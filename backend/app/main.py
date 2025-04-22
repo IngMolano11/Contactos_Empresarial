@@ -13,6 +13,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="API Contactos MVP")
 
+
 # (No tocamos redirect_slashes, dejamos el comportamiento por defecto para que siempre redirija enrutamientos consistentes)
 
 # Middleware CORS

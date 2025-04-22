@@ -1,11 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+import os
 
-# URL de la base de datos (usa SQLite en este caso)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./contacts.db"
+load_dotenv()  # carga variables de .env
 
-# Crea el motor de conexión
+SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL')
+
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
