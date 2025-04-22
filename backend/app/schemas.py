@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, validator, ConfigDict
 from typing import Optional, List
 from enum import Enum
 
@@ -57,9 +57,9 @@ class ContactUpdate(ContactBase):
 class ContactInDB(ContactBase):
     id: int
     
-    class Config:
-        orm_mode = True
-
+    model_config = ConfigDict(from_attributes=True)
+    
+    
 # Clase de paginación para los contactos
 class PaginatedContacts(BaseModel):
     total: int               # Total de registros disponibles
