@@ -3,6 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.database import engine
 from app.models_db import Base
 from app.routes import router as contactos_router
@@ -12,16 +13,18 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="API Contactos MVP")
 
+# (No tocamos redirect_slashes, dejamos el comportamiento por defecto para que siempre redirija enrutamientos consistentes)
+
 # Middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],  # Cambia según tu frontend
+    allow_origins=["http://localhost:4200"],  # Ajusta según tu frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Manejador de errores de validación
+# Manejador de errores de validación de Pydantic
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
@@ -32,7 +35,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         },
     )
 
-# Manejador de errores HTTP generales (404, 400, etc.)
+# Manejador de errores HTTP (404, 400, etc.)
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
