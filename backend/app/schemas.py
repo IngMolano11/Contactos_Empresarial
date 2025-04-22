@@ -5,7 +5,7 @@ from enum import Enum
 class ParentescoEnum(str, Enum):
     amigo = "Amigo"
     hermano = "Hermano"
-    novio = "Novio/a"
+    pareja = "Pareja"
     compañero_trabajo = "Compañero de trabajo"
     otro = "Otro"
 class CategoriaEnum(str, Enum):

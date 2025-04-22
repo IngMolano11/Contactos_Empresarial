@@ -7,13 +7,14 @@ Base = declarative_base()
 class ParentescoEnum(str, enum.Enum):
     amigo = "Amigo"
     hermano = "Hermano"
-    novio = "Novio/a"
+    pareja = "Pareja"
     compañero_trabajo = "Compañero de trabajo"
     otro = "Otro"
 
 class CategoriaEnum(str, enum.Enum):
     profesional = "Profesional"
     utilidad = "Utilidad"
+    academico = "Academico"
     otro = "Otro"
 
 class ContactModel(Base):
