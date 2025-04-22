@@ -27,7 +27,7 @@ def create_contacto(contacto: schemas.ContactCreate,
 # ------------------ LISTAR CONTACTOS ------------------
 
 # GET /api/contactos/
-@router.get("/", response_model=List[schemas.ContactInDB], tags=["Contactos"])
+@router.get("/", response_model=schemas.PaginatedContacts, tags=["Contactos"])
 def read_contactos(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1),
@@ -46,7 +46,19 @@ def read_contactos(
             (models_db.ContactModel.nombre.ilike(f"%{q}%")) |
             (models_db.ContactModel.email.ilike(f"%{q}%"))
         )
-    return query.offset(skip).limit(limit).all()
+    # 1) Total de registros antes de la paginación
+    total = query.count()
+    
+    # 2) Obtener los registros aplicando paginación
+    items = query.offset(skip).limit(limit).all()
+    
+    # 3) Devolver la respuesta con los metadatos de paginación
+    return schemas.PaginatedContacts(
+        total=total,
+        skip=skip,
+        limit=limit,
+        data=items
+    )
 
 # ------------------ OBTENER CONTACTO POR ID ------------------
 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 
 class ParentescoEnum(str, Enum):
@@ -8,6 +8,7 @@ class ParentescoEnum(str, Enum):
     pareja = "Pareja"
     compañero_trabajo = "Compañero de trabajo"
     otro = "Otro"
+
 class CategoriaEnum(str, Enum):
     profesional = "Profesional"
     utilidad = "Utilidad"
@@ -34,3 +35,10 @@ class ContactInDB(ContactBase):
     
     class Config:
         orm_mode = True
+
+# Agregar la clase de paginación
+class PaginatedContacts(BaseModel):
+    total: int               # Total de registros disponibles
+    skip: int                # Cuántos registros se omitieron
+    limit: int               # Tamaño de página solicitado
+    data: List[ContactInDB]  # Lista de contactos paginados
