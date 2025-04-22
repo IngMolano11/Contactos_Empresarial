@@ -1,13 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine
+from app.models_db import Base
 from app.routes import router as contactos_router
+
+# Crear tablas
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="API Contactos MVP")
 
-# Configura CORS para permitir solicitudes desde tu frontend (Angular)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],  # Cambia si tu frontend corre en otro puerto o dominio
+    allow_origins=["http://localhost:4200"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
