@@ -1,1 +1,7 @@
 <p>contact-list works!</p>
+<ul>
+  <li *ngFor="let c of contacts">
+    {{ c.nombre }} – {{ c.telefono }}
+    <button (click)="onDelete(c.id!)">Eliminar</button>
+  </li>
+</ul>
