@@ -1,13 +1,14 @@
 // src/app/components/contact-list/contact-list.component.ts
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { Contacto } from '../../models/contacto.model';
 import { ContactService } from '../../services/contact.service';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-contact-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './contact-list.component.html',
   styleUrls: ['./contact-list.component.css']
 })

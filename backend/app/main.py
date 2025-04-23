@@ -1,3 +1,5 @@
+# backend/app/main.py
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -8,24 +10,21 @@ from app.database import engine
 from app.models_db import Base
 from app.routes import router as contactos_router
 
-# Crear tablas en la base de datos
+# --- Crea tablas en la base de datos al iniciar ---
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="API Contactos MVP")
 
-
-# (No tocamos redirect_slashes, dejamos el comportamiento por defecto para que siempre redirija enrutamientos consistentes)
-
-# Middleware CORS
+# --- Middleware CORS (ajusta el origen según necesites) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],  # Ajusta según tu frontend
+    allow_origins=["http://localhost:4200"],  # o ["*"] durante desarrollo
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Manejador de errores de validación de Pydantic
+# --- Handlers de errores de validación y HTTP ---
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
@@ -36,7 +35,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         },
     )
 
-# Manejador de errores HTTP (404, 400, etc.)
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
@@ -44,5 +42,14 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         content={"message": exc.detail},
     )
 
-# Montar el router de contactos en /api/contactos
+# --- Endpoint de salud (ping) ---
+@app.get("/api/ping")
+async def ping():
+    """
+    Ruta para que el frontend verifique que la API está viva.
+    Devuelve JSON: {"ping": "pong"}
+    """
+    return {"ping": "pong"}
+
+# --- Monta el router de contactos en /api/contactos ---
 app.include_router(contactos_router, prefix="/api/contactos")
