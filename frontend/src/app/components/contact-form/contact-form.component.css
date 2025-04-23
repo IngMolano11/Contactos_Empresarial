@@ -72,3 +72,20 @@ button[type="button"] {
   background-color: #e8f5e9;
   border-radius: 4px;
 }
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+/* Deshabilitar campos durante la carga */
+form.loading input,
+form.loading select,
+form.loading button {
+  opacity: 0.7;
+  pointer-events: none;
+}

@@ -6,5 +6,5 @@ export const appRoutes: Routes = [
   { path: '', redirectTo: 'contactos', pathMatch: 'full' },
   { path: 'contactos', component: ContactListComponent },
   { path: 'contactos/nuevo', component: ContactFormComponent },
-  { path: 'contactos/editar/:id', component: ContactFormComponent },
+  { path: 'contactos/editar/:id', component: ContactFormComponent }
 ];

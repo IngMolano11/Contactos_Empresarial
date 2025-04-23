@@ -7,6 +7,7 @@ import {
   Validators,
   ReactiveFormsModule
 } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ContactService } from '../../services/contact.service';
 import { Contacto } from '../../models/contacto.model';
 
@@ -25,13 +26,17 @@ export class ContactFormComponent implements OnInit {
   loading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
+  isEditing = false;
+  contactId?: number;
 
   @Input() contacto?: Contacto;             // recibe datos del padre :contentReference[oaicite:0]{index=0}
   @Output() saved = new EventEmitter<void>(); // emite evento al padre :contentReference[oaicite:1]{index=1}
 
   constructor(
     private fb: FormBuilder,
-    private service: ContactService
+    private service: ContactService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     this.form = this.fb.group({
       nombre: ['', Validators.required],
@@ -45,34 +50,52 @@ export class ContactFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Si viene un contacto, rellenamos el formulario
-    if (this.contacto) {
+    // Obtener el ID del contacto de la URL si estamos en modo edición
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditing = true;
+      this.contactId = +id;
+      this.loadContact(this.contactId);
+    } else if (this.contacto) {
       this.form.patchValue(this.contacto);
     }
   }
 
+  loadContact(id: number) {
+    this.loading = true;
+    this.service.getById(id).subscribe({
+      next: (contacto) => {
+        this.form.patchValue(contacto);
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar contacto:', error);
+        this.errorMessage = 'Error al cargar el contacto';
+        this.loading = false;
+      }
+    });
+  }
+
   onSubmit(): void {
     if (this.form.valid) {
-      console.log('Formulario válido, datos:', this.form.value); // Debug
       this.loading = true;
       this.errorMessage = null;
       this.successMessage = null;
 
-      const request$ = this.contacto
-        ? this.service.update(this.contacto.id!, this.form.value)
+      const request$ = this.isEditing && this.contactId
+        ? this.service.update(this.contactId, this.form.value)
         : this.service.create(this.form.value);
 
       request$.subscribe({
-        next: (response) => {
-          console.log('Respuesta exitosa:', response); // Debug
+        next: () => {
           this.successMessage = 'Contacto guardado exitosamente';
           this.loading = false;
-          this.saved.emit();
-          this.form.reset();
+          // Redirigir a la lista después de guardar
+          setTimeout(() => this.router.navigate(['/contactos']), 1500);
         },
         error: (err) => {
-          console.error('Error detallado:', err); // Debug mejorado
-          this.errorMessage = `Error al guardar el contacto: ${err.message}`;
+          console.error('Error:', err);
+          this.errorMessage = `Error al ${this.isEditing ? 'actualizar' : 'crear'} el contacto`;
           this.loading = false;
         }
       });
@@ -83,8 +106,6 @@ export class ContactFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.form.reset();
-    this.errorMessage = null;
-    this.successMessage = null;
+    this.router.navigate(['/contactos']);
   }
 }

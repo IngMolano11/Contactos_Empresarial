@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Contacto } from '../../models/contacto.model';
 import { ContactService } from '../../services/contact.service';
-import { ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-contact-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterModule
+  ],
   templateUrl: './contact-list.component.html',
   styleUrls: ['./contact-list.component.css']
 })
@@ -22,16 +24,32 @@ export class ContactListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.service.getAll()
-      .subscribe((data: Contacto[]) => this.contacts = data);
+    this.loadContacts();
+  }
+
+  loadContacts() {
+    console.log('Iniciando carga de contactos...');
+    this.service.getAll().subscribe({
+      next: (data: Contacto[]) => {
+        console.log('Contactos recibidos:', data);
+        this.contacts = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar contactos:', error);
+      }
+    });
   }
 
   onDelete(id: number) {
     if (confirm('¿Eliminar contacto?')) {
-      this.service.delete(id)
-        .subscribe(() =>
-          this.contacts = this.contacts.filter(c => c.id !== id)
-        );
+      this.service.delete(id).subscribe({
+        next: () => {
+          this.contacts = this.contacts.filter(c => c.id !== id);
+        },
+        error: (error) => {
+          console.error('Error al eliminar:', error);
+        }
+      });
     }
   }
 

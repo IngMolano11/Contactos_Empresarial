@@ -1,7 +1,11 @@
 <div class="form-container">
-  <h2>{{ contacto ? 'Editar' : 'Nuevo' }} Contacto</h2>
+  <h2>{{ isEditing ? 'Editar' : 'Nuevo' }} Contacto</h2>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
     <div class="form-field">
       <label>Nombre:</label>
       <input formControlName="nombre" type="text" />

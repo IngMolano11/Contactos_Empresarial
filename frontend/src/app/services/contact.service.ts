@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, map } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Contacto } from '../models/contacto.model';
 import { environment } from '../../environments/environment';
@@ -19,14 +19,17 @@ export class ContactService {
   }
 
   getAll(): Observable<Contacto[]> {
-    return this.http.get<Contacto[]>(`${this.API}`).pipe(
+    return this.http.get<{ data: Contacto[] }>(this.API).pipe(
+      map(response => {
+        console.log('Respuesta del servidor:', response);
+        return response.data || [];
+      }),
       catchError(this.handleError)
     );
   }
 
   create(contacto: Contacto): Observable<Contacto> {
-    console.log('Enviando contacto:', contacto); // Para debug
-    return this.http.post<Contacto>(`${this.API}`, contacto).pipe(
+    return this.http.post<Contacto>(this.API, contacto).pipe(
       catchError(this.handleError)
     );
   }
@@ -41,5 +44,9 @@ export class ContactService {
     return this.http.delete<void>(`${this.API}/${id}`).pipe(
       catchError(this.handleError)
     );
+  }
+
+  getById(id: number): Observable<Contacto> {
+    return this.http.get<Contacto>(`${this.API}/${id}`);
   }
 }
