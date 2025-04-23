@@ -1,42 +1,45 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Contacto } from '../models/contacto.model'; // Modelo de Contacto
-import { environment } from  '../../environments/environment'; // Importar la configuración de entorno
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { Contacto } from '../models/contacto.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContactService {
-  private API = environment.apiUrl; // Usar la URL de la API desde el archivo environment.ts
+  private API = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
-  private handleError(error: any) {
+  private handleError(error: HttpErrorResponse) {
     console.error('An error occurred:', error);
-    return throwError(() => new Error('Something went wrong; please try again later.'));
+    return throwError(() => error);
   }
 
-  // Obtener todos los contactos
   getAll(): Observable<Contacto[]> {
-    return this.http.get<Contacto[]>(`${this.API}/`)
-      .pipe(catchError(this.handleError));  // Usar la URL base de environment
+    return this.http.get<Contacto[]>(`${this.API}`).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  // Crear un nuevo contacto
-  create(c: Contacto): Observable<Contacto> {
-    return this.http.post<Contacto>(`${this.API}/`, c);  // Usar la URL base de environment
+  create(contacto: Contacto): Observable<Contacto> {
+    console.log('Enviando contacto:', contacto); // Para debug
+    return this.http.post<Contacto>(`${this.API}`, contacto).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  // Actualizar un contacto existente
-  update(id: number, c: Contacto): Observable<Contacto> {
-    return this.http.put<Contacto>(`${this.API}/${id}`, c);  // Usar la URL base de environment
+  update(id: number, contacto: Contacto): Observable<Contacto> {
+    return this.http.put<Contacto>(`${this.API}/${id}`, contacto).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  // Eliminar un contacto
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API}/${id}`);  // Usar la URL base de environment
+    return this.http.delete<void>(`${this.API}/${id}`).pipe(
+      catchError(this.handleError)
+    );
   }
 }

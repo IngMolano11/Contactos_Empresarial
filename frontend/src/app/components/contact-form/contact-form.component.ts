@@ -53,6 +53,7 @@ export class ContactFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.valid) {
+      console.log('Formulario válido, datos:', this.form.value); // Debug
       this.loading = true;
       this.errorMessage = null;
       this.successMessage = null;
@@ -62,16 +63,17 @@ export class ContactFormComponent implements OnInit {
         : this.service.create(this.form.value);
 
       request$.subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('Respuesta exitosa:', response); // Debug
           this.successMessage = 'Contacto guardado exitosamente';
           this.loading = false;
           this.saved.emit();
           this.form.reset();
         },
-        error: err => {
-          this.errorMessage = 'Error al guardar el contacto';
+        error: (err) => {
+          console.error('Error detallado:', err); // Debug mejorado
+          this.errorMessage = `Error al guardar el contacto: ${err.message}`;
           this.loading = false;
-          console.error('Error:', err);
         }
       });
     } else {
