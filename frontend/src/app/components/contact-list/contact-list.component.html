@@ -4,12 +4,17 @@
     <a routerLink="/contactos/nuevo" class="add-button">Nuevo Contacto</a>
   </div>
 
-  <div *ngIf="contacts && contacts.length === 0" class="no-contacts">
-    No tienes contactos guardados. ¡Agrega uno nuevo!
+  <!-- Agregar el componente de filtro aquí -->
+  <div class="filter-section">
+    <app-contact-filter (search)="onSearch($event)"></app-contact-filter>
+  </div>
+
+  <div *ngIf="filteredContacts.length === 0" class="no-contacts">
+    {{contacts.length === 0 ? 'No tienes contactos guardados. ¡Agrega uno nuevo!' : 'No se encontraron contactos con ese filtro.'}}
   </div>
 
   <div class="contacts-list">
-    <div *ngFor="let c of contacts" class="contact-card">
+    <div *ngFor="let c of filteredContacts" class="contact-card">
       <div class="contact-header">
         <h3>{{ c.nombre }}</h3>
       </div>

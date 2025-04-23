@@ -4,19 +4,22 @@ import { Component, OnInit } from '@angular/core';
 import { Contacto } from '../../models/contacto.model';
 import { ContactService } from '../../services/contact.service';
 import { Router, RouterModule } from '@angular/router';
+import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
 
 @Component({
   selector: 'app-contact-list',
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    ContactFilterComponent
   ],
   templateUrl: './contact-list.component.html',
   styleUrls: ['./contact-list.component.css']
 })
 export class ContactListComponent implements OnInit {
   contacts: Contacto[] = [];
+  filteredContacts: Contacto[] = [];
 
   constructor(
     private service: ContactService,
@@ -33,6 +36,7 @@ export class ContactListComponent implements OnInit {
       next: (data: Contacto[]) => {
         console.log('Contactos recibidos:', data);
         this.contacts = data;
+        this.filteredContacts = data;
       },
       error: (error) => {
         console.error('Error al cargar contactos:', error);
@@ -45,6 +49,7 @@ export class ContactListComponent implements OnInit {
       this.service.delete(id).subscribe({
         next: () => {
           this.contacts = this.contacts.filter(c => c.id !== id);
+          this.filteredContacts = this.contacts;
         },
         error: (error) => {
           console.error('Error al eliminar:', error);
@@ -55,5 +60,17 @@ export class ContactListComponent implements OnInit {
 
   onEdit(id: number) {
     this.router.navigate(['/contactos/editar', id]);
+  }
+
+  onSearch(term: string) {
+    if (!term) {
+      this.filteredContacts = this.contacts;
+    } else {
+      this.filteredContacts = this.contacts.filter(contact =>
+        contact.nombre.toLowerCase().includes(term.toLowerCase()) ||
+        contact.email?.toLowerCase().includes(term.toLowerCase()) ||
+        contact.telefono.toLowerCase().includes(term.toLowerCase())
+      );
+    }
   }
 }

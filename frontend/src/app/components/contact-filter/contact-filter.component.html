@@ -1,0 +1,11 @@
+<div class="filter-container">
+  <div class="search-box">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()"
+      placeholder="Buscar contactos..."
+    >
+    <i class="search-icon"></i>
+  </div>
+</div>
