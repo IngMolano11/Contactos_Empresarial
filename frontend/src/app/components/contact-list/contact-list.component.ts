@@ -6,6 +6,12 @@ import { ContactService } from '../../services/contact.service';
 import { Router, RouterModule } from '@angular/router';
 import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
 
+interface FilterCriteria {
+  searchTerm: string;
+  parentesco: string;
+  categoria: string;
+}
+
 @Component({
   selector: 'app-contact-list',
   standalone: true,
@@ -72,5 +78,22 @@ export class ContactListComponent implements OnInit {
         contact.telefono.toLowerCase().includes(term.toLowerCase())
       );
     }
+  }
+
+  onFilterChange(criteria: FilterCriteria) {
+    this.filteredContacts = this.contacts.filter(contact => {
+      const matchesSearch = !criteria.searchTerm ||
+        contact.nombre.toLowerCase().includes(criteria.searchTerm.toLowerCase()) ||
+        contact.email?.toLowerCase().includes(criteria.searchTerm.toLowerCase()) ||
+        contact.telefono.toLowerCase().includes(criteria.searchTerm.toLowerCase());
+
+      const matchesParentesco = !criteria.parentesco ||
+        contact.parentesco === criteria.parentesco;
+
+      const matchesCategoria = !criteria.categoria ||
+        contact.categoria === criteria.categoria;
+
+      return matchesSearch && matchesParentesco && matchesCategoria;
+    });
   }
 }

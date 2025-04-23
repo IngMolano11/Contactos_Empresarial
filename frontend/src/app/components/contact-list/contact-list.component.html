@@ -4,9 +4,8 @@
     <a routerLink="/contactos/nuevo" class="add-button">Nuevo Contacto</a>
   </div>
 
-  <!-- Agregar el componente de filtro aquí -->
   <div class="filter-section">
-    <app-contact-filter (search)="onSearch($event)"></app-contact-filter>
+    <app-contact-filter (filterChange)="onFilterChange($event)"></app-contact-filter>
   </div>
 
   <div *ngIf="filteredContacts.length === 0" class="no-contacts">

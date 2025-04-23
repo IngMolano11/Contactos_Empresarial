@@ -1,11 +1,41 @@
 <div class="filter-container">
+  <h3 class="filter-title">Filtrar contactos</h3>
+
   <div class="search-box">
     <input
       type="text"
       [(ngModel)]="searchTerm"
-      (ngModelChange)="onSearch()"
-      placeholder="Buscar contactos..."
+      (ngModelChange)="onFilterChange()"
+      placeholder="Buscar por nombre, teléfono o email..."
     >
     <i class="search-icon"></i>
+  </div>
+
+  <div class="filter-options">
+    <div class="filter-select">
+      <label>Parentesco</label>
+      <select [(ngModel)]="selectedParentesco" (ngModelChange)="onFilterChange()">
+        <option value="">Todos los parentescos</option>
+        <option *ngFor="let option of parentescoOptions" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-select">
+      <label>Categoría</label>
+      <select [(ngModel)]="selectedCategoria" (ngModelChange)="onFilterChange()">
+        <option value="">Todas las categorías</option>
+        <option *ngFor="let option of categoriaOptions" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+
+    <div class="button-container">
+      <button class="reset-button" (click)="resetFilters()">
+        Reiniciar filtros
+      </button>
+    </div>
   </div>
 </div>
