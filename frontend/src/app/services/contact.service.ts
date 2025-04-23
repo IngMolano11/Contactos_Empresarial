@@ -14,8 +14,11 @@ export class ContactService {
   constructor(private http: HttpClient) {}
 
   private handleError(error: HttpErrorResponse) {
-    console.error('An error occurred:', error);
-    return throwError(() => error);
+    console.error('Error detallado:', error);
+    return throwError(() => {
+      const message = error.error?.detail || 'Error desconocido';
+      return new Error(message);
+    });
   }
 
   getAll(): Observable<Contacto[]> {
@@ -29,7 +32,18 @@ export class ContactService {
   }
 
   create(contacto: Contacto): Observable<Contacto> {
-    return this.http.post<Contacto>(this.API, contacto).pipe(
+    // Asegurar que los campos opcionales sean undefined si están vacíos
+    const payload = {
+      ...contacto,
+      email: contacto.email || undefined,
+      direccion: contacto.direccion || undefined,
+      lugar: contacto.lugar || undefined,
+      parentesco: contacto.parentesco || undefined,
+      categoria: contacto.categoria || undefined
+    };
+
+    console.log('Enviando contacto:', payload); // Debug
+    return this.http.post<Contacto>(this.API, payload).pipe(
       catchError(this.handleError)
     );
   }

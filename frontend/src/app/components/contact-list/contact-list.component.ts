@@ -5,6 +5,7 @@ import { Contacto } from '../../models/contacto.model';
 import { ContactService } from '../../services/contact.service';
 import { Router, RouterModule } from '@angular/router';
 import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 interface FilterCriteria {
   searchTerm: string;
@@ -21,11 +22,31 @@ interface FilterCriteria {
     ContactFilterComponent
   ],
   templateUrl: './contact-list.component.html',
-  styleUrls: ['./contact-list.component.css']
+  styleUrls: ['./contact-list.component.css'],
+  animations: [
+    trigger('filterAnimation', [
+      state('hidden', style({
+        opacity: 0,
+        height: '0px',
+        padding: '0px'
+      })),
+      state('visible', style({
+        opacity: 1,
+        height: '*'
+      })),
+      transition('hidden => visible', [
+        animate('300ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('200ms ease-in')
+      ])
+    ])
+  ]
 })
 export class ContactListComponent implements OnInit {
   contacts: Contacto[] = [];
   filteredContacts: Contacto[] = [];
+  showFilters: boolean = false; // Añadir esta propiedad
 
   constructor(
     private service: ContactService,
@@ -95,5 +116,9 @@ export class ContactListComponent implements OnInit {
 
       return matchesSearch && matchesParentesco && matchesCategoria;
     });
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 }

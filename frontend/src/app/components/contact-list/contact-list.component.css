@@ -13,6 +13,40 @@
   border-bottom: 2px solid #e3f2fd;
 }
 
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-toggle-button {
+  padding: 0.8rem 1.5rem;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3);
+}
+
+.search-toggle-button:hover {
+  background-color: #1976D2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+}
+
+.filter-section {
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
 .header h2 {
   color: #1565c0;
   margin: 0;

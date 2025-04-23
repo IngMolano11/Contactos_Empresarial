@@ -1,10 +1,15 @@
 <div class="contacts-container">
   <div class="header">
     <h2>Mis Contactos</h2>
-    <a routerLink="/contactos/nuevo" class="add-button">Nuevo Contacto</a>
+    <div class="header-actions">
+      <button class="search-toggle-button" (click)="toggleFilters()">
+        {{ showFilters ? 'Ocultar filtros' : 'Buscar' }}
+      </button>
+      <a routerLink="/contactos/nuevo" class="add-button">Nuevo Contacto</a>
+    </div>
   </div>
 
-  <div class="filter-section">
+  <div class="filter-section" [@filterAnimation]="showFilters ? 'visible' : 'hidden'" *ngIf="showFilters">
     <app-contact-filter (filterChange)="onFilterChange($event)"></app-contact-filter>
   </div>
 

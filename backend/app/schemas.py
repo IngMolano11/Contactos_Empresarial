@@ -28,7 +28,7 @@ class ContactBase(BaseModel):
 
     telefono: str = Field(
         ...,
-        pattern=r'^\+?\d{7,15}$',  # Cambié `regex` por `pattern`
+        pattern=r'^\+?[0-9]{7,15}$',  # Cambié `regex` por `pattern`
         description="Teléfono con código internacional opcional, 7–15 dígitos"
     )  # Validación por expresión regular
 
