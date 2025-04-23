@@ -8,7 +8,7 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
     <div class="form-field">
       <label>Nombre:</label>
-      <input formControlName="nombre" type="text" />
+      <input formControlName="nombre" type="text" placeholder="Ingresa el nombre" />
       <div *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched" class="error">
         El nombre es obligatorio.
       </div>
@@ -16,7 +16,7 @@
 
     <div class="form-field">
       <label>Teléfono:</label>
-      <input formControlName="telefono" type="text" />
+      <input formControlName="telefono" type="text" placeholder="Ingresa el teléfono" />
       <div *ngIf="form.get('telefono')?.invalid && form.get('telefono')?.touched" class="error">
         El teléfono es obligatorio.
       </div>
@@ -24,7 +24,7 @@
 
     <div class="form-field">
       <label>Email:</label>
-      <input formControlName="email" type="email" />
+      <input formControlName="email" type="email" placeholder="Ingresa el email" />
       <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="error">
         El email no es válido.
       </div>
@@ -32,17 +32,18 @@
 
     <div class="form-field">
       <label>Dirección:</label>
-      <input formControlName="direccion" type="text" />
+      <input formControlName="direccion" type="text" placeholder="Ingresa la dirección" />
     </div>
 
     <div class="form-field">
       <label>Lugar:</label>
-      <input formControlName="lugar" type="text" />
+      <input formControlName="lugar" type="text" placeholder="Ingresa el lugar" />
     </div>
 
     <div class="form-field">
       <label>Parentesco:</label>
       <select formControlName="parentesco">
+        <option value="" disabled selected>Selecciona un parentesco</option>
         <option *ngFor="let option of ['Amigo', 'Hermano', 'Pareja', 'Compañero de trabajo', 'Otro']" [value]="option">
           {{ option }}
         </option>
@@ -52,6 +53,7 @@
     <div class="form-field">
       <label>Categoría:</label>
       <select formControlName="categoria">
+        <option value="" disabled selected>Selecciona una categoría</option>
         <option *ngFor="let option of ['Profesional', 'Utilidad', 'Academico', 'Otro']" [value]="option">
           {{ option }}
         </option>
@@ -59,7 +61,7 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" [disabled]="form.invalid">Guardar</button>
+      <button type="submit" [disabled]="form.invalid">{{ isEditing ? 'Actualizar' : 'Guardar' }}</button>
       <button type="button" (click)="onCancel()">Cancelar</button>
     </div>
 

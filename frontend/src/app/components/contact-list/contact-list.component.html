@@ -4,12 +4,18 @@
     <a routerLink="/contactos/nuevo" class="add-button">Nuevo Contacto</a>
   </div>
 
+  <div *ngIf="contacts && contacts.length === 0" class="no-contacts">
+    No tienes contactos guardados. ¡Agrega uno nuevo!
+  </div>
+
   <div class="contacts-list">
     <div *ngFor="let c of contacts" class="contact-card">
-      <div class="contact-info">
+      <div class="contact-header">
         <h3>{{ c.nombre }}</h3>
-        <p>{{ c.telefono }}</p>
-        <p *ngIf="c.email">{{ c.email }}</p>
+      </div>
+      <div class="contact-body">
+        <p class="phone">{{ c.telefono }}</p>
+        <p *ngIf="c.email" class="email">{{ c.email }}</p>
       </div>
       <div class="contact-actions">
         <button (click)="onEdit(c.id!)" class="edit-button">Editar</button>

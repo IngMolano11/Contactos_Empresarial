@@ -1,76 +1,146 @@
 .form-container {
   max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
+  margin: 1.5rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(30, 136, 229, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(30, 136, 229, 0.15);
+}
+
+h2 {
+  color: #1565c0;
+  margin-top: 0;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid #e3f2fd;
 }
 
 .form-field {
-  margin-bottom: 16px;
+  margin-bottom: 1.2rem;
+  position: relative;
 }
 
 label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #455a64;
+  transition: color 0.3s ease;
 }
 
 input, select {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
+  padding: 0.8rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  background-color: #f8fafc;
+  color: #333;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+  background-color: #fff;
+}
+
+.form-field:hover label {
+  color: #1976d2;
 }
 
 .error {
-  color: #f44336;
-  font-size: 14px;
-  margin-top: 4px;
+  color: #e53935;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .form-actions {
-  margin-top: 24px;
+  margin-top: 2rem;
   display: flex;
-  gap: 12px;
+  gap: 1rem;
+  justify-content: center;
 }
 
 button {
-  padding: 8px 16px;
+  padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 button[type="submit"] {
-  background-color: #4CAF50;
+  background-color: #1976d2;
   color: white;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background-color: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 button[type="submit"]:disabled {
-  background-color: #ccc;
+  background-color: #90caf9;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
 button[type="button"] {
-  background-color: #f44336;
-  color: white;
+  background-color: #f5f5f5;
+  color: #455a64;
+  border: 1px solid #e0e0e0;
+}
+
+button[type="button"]:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error-message, .success-message {
+  padding: 1rem;
+  margin-top: 1.5rem;
+  border-radius: 6px;
+  animation: slideIn 0.4s ease;
+  text-align: center;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .error-message {
-  color: #f44336;
-  padding: 12px;
-  margin-top: 16px;
+  color: #d32f2f;
   background-color: #ffebee;
-  border-radius: 4px;
+  border-left: 4px solid #d32f2f;
 }
 
 .success-message {
-  color: #4CAF50;
-  padding: 12px;
-  margin-top: 16px;
+  color: #2e7d32;
   background-color: #e8f5e9;
-  border-radius: 4px;
+  border-left: 4px solid #2e7d32;
 }
 
 .loading {
@@ -78,14 +148,46 @@ button[type="button"] {
   justify-content: center;
   align-items: center;
   min-height: 200px;
-  font-size: 1.2em;
-  color: #666;
+  font-size: 1.1rem;
+  color: #1976d2;
+  flex-direction: column;
 }
 
-/* Deshabilitar campos durante la carga */
+.loading::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  margin-top: 1rem;
+  border: 3px solid #e3f2fd;
+  border-top: 3px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 form.loading input,
 form.loading select,
 form.loading button {
   opacity: 0.7;
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    padding: 1.5rem;
+    margin: 1rem;
+    width: auto;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
 }
