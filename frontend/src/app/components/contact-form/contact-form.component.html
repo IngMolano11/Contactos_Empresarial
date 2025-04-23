@@ -1,55 +1,69 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
-  <label>
-    Nombre:
-    <input formControlName="nombre" type="text" />
-  </label>
-  <div *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched">
-    El nombre es obligatorio.
-  </div>
+<div class="form-container">
+  <h2>{{ contacto ? 'Editar' : 'Nuevo' }} Contacto</h2>
 
-  <label>
-    Teléfono:
-    <input formControlName="telefono" type="text" />
-  </label>
-  <div *ngIf="form.get('telefono')?.invalid && form.get('telefono')?.touched">
-    El teléfono es obligatorio.
-  </div>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="form-field">
+      <label>Nombre:</label>
+      <input formControlName="nombre" type="text" />
+      <div *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched" class="error">
+        El nombre es obligatorio.
+      </div>
+    </div>
 
-  <label>
-    Email:
-    <input formControlName="email" type="email" />
-  </label>
-  <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-    El email no es válido.
-  </div>
+    <div class="form-field">
+      <label>Teléfono:</label>
+      <input formControlName="telefono" type="text" />
+      <div *ngIf="form.get('telefono')?.invalid && form.get('telefono')?.touched" class="error">
+        El teléfono es obligatorio.
+      </div>
+    </div>
 
-  <label>
-    Dirección:
-    <input formControlName="direccion" type="text" />
-  </label>
+    <div class="form-field">
+      <label>Email:</label>
+      <input formControlName="email" type="email" />
+      <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="error">
+        El email no es válido.
+      </div>
+    </div>
 
-  <label>
-    Lugar:
-    <input formControlName="lugar" type="text" />
-  </label>
+    <div class="form-field">
+      <label>Dirección:</label>
+      <input formControlName="direccion" type="text" />
+    </div>
 
-  <label>
-    Parentesco:
-    <select formControlName="parentesco">
-      <option *ngFor="let option of ['Amigo', 'Hermano', 'Pareja', 'Compañero de trabajo', 'Otro']" [value]="option">
-        {{ option }}
-      </option>
-    </select>
-  </label>
+    <div class="form-field">
+      <label>Lugar:</label>
+      <input formControlName="lugar" type="text" />
+    </div>
 
-  <label>
-    Categoría:
-    <select formControlName="categoria">
-      <option *ngFor="let option of ['Profesional', 'Utilidad', 'Academico', 'Otro']" [value]="option">
-        {{ option }}
-      </option>
-    </select>
-  </label>
+    <div class="form-field">
+      <label>Parentesco:</label>
+      <select formControlName="parentesco">
+        <option *ngFor="let option of ['Amigo', 'Hermano', 'Pareja', 'Compañero de trabajo', 'Otro']" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
 
-  <button type="submit" [disabled]="form.invalid">Guardar</button>
-</form>
+    <div class="form-field">
+      <label>Categoría:</label>
+      <select formControlName="categoria">
+        <option *ngFor="let option of ['Profesional', 'Utilidad', 'Academico', 'Otro']" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="form.invalid">Guardar</button>
+      <button type="button" (click)="onCancel()">Cancelar</button>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+    <div *ngIf="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+  </form>
+</div>

@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { Contacto } from '../../models/contacto.model';
 import { ContactService } from '../../services/contact.service';
 import { ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-contact-list',
@@ -15,7 +16,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 export class ContactListComponent implements OnInit {
   contacts: Contacto[] = [];
 
-  constructor(private service: ContactService) {}
+  constructor(
+    private service: ContactService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.service.getAll()
@@ -29,5 +33,9 @@ export class ContactListComponent implements OnInit {
           this.contacts = this.contacts.filter(c => c.id !== id)
         );
     }
+  }
+
+  onEdit(id: number) {
+    this.router.navigate(['/contactos/editar', id]);
   }
 }

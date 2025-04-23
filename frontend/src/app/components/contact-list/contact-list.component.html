@@ -1,7 +1,20 @@
-<p>Hola Camilo</p>
-<ul>
-  <li *ngFor="let c of contacts">
-    {{ c.nombre }} – {{ c.telefono }}
-    <button (click)="onDelete(c.id!)">Eliminar</button>
-  </li>
-</ul>
+<div class="contacts-container">
+  <div class="header">
+    <h2>Mis Contactos</h2>
+    <a routerLink="/contactos/nuevo" class="add-button">Nuevo Contacto</a>
+  </div>
+
+  <div class="contacts-list">
+    <div *ngFor="let c of contacts" class="contact-card">
+      <div class="contact-info">
+        <h3>{{ c.nombre }}</h3>
+        <p>{{ c.telefono }}</p>
+        <p *ngIf="c.email">{{ c.email }}</p>
+      </div>
+      <div class="contact-actions">
+        <button (click)="onEdit(c.id!)" class="edit-button">Editar</button>
+        <button (click)="onDelete(c.id!)" class="delete-button">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>

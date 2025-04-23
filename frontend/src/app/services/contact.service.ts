@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Contacto } from '../models/contacto.model'; // Modelo de Contacto
 import { environment } from  '../../environments/environment'; // Importar la configuración de entorno
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +14,15 @@ export class ContactService {
 
   constructor(private http: HttpClient) {}
 
+  private handleError(error: any) {
+    console.error('An error occurred:', error);
+    return throwError(() => new Error('Something went wrong; please try again later.'));
+  }
+
   // Obtener todos los contactos
   getAll(): Observable<Contacto[]> {
-    return this.http.get<Contacto[]>(`${this.API}/`);  // Usar la URL base de environment
+    return this.http.get<Contacto[]>(`${this.API}/`)
+      .pipe(catchError(this.handleError));  // Usar la URL base de environment
   }
 
   // Crear un nuevo contacto

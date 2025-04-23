@@ -22,6 +22,9 @@ import { Contacto } from '../../models/contacto.model';
 })
 export class ContactFormComponent implements OnInit {
   form: FormGroup;
+  loading = false;
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
 
   @Input() contacto?: Contacto;             // recibe datos del padre :contentReference[oaicite:0]{index=0}
   @Output() saved = new EventEmitter<void>(); // emite evento al padre :contentReference[oaicite:1]{index=1}
@@ -33,11 +36,11 @@ export class ContactFormComponent implements OnInit {
     this.form = this.fb.group({
       nombre: ['', Validators.required],
       telefono: ['', Validators.required],
-      email: ['', [Validators.email]],
+      email: ['', [Validators.required, Validators.email]],
       direccion: [''],
       lugar: [''],
-      parentesco: ['Amigo'],
-      categoria: ['Profesional']
+      parentesco: [''],
+      categoria: ['']
     });
   }
 
@@ -50,20 +53,36 @@ export class ContactFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.valid) {
+      this.loading = true;
+      this.errorMessage = null;
+      this.successMessage = null;
+
       const request$ = this.contacto
         ? this.service.update(this.contacto.id!, this.form.value)
         : this.service.create(this.form.value);
 
       request$.subscribe({
         next: () => {
-          // Emitimos al padre y limpiamos
+          this.successMessage = 'Contacto guardado exitosamente';
+          this.loading = false;
           this.saved.emit();
           this.form.reset();
         },
         error: err => {
-          console.error('Error al guardar contacto:', err);
+          this.errorMessage = 'Error al guardar el contacto';
+          this.loading = false;
+          console.error('Error:', err);
         }
       });
+    } else {
+      this.errorMessage = 'Por favor, complete todos los campos obligatorios.';
+      this.successMessage = null;
     }
+  }
+
+  onCancel(): void {
+    this.form.reset();
+    this.errorMessage = null;
+    this.successMessage = null;
   }
 }
