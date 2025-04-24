@@ -27,9 +27,29 @@
         <p *ngIf="c.email" class="email">{{ c.email }}</p>
       </div>
       <div class="contact-actions">
-        <button (click)="onEdit(c.id!)" class="edit-button">Editar</button>
-        <button (click)="onDelete(c.id!)" class="delete-button">Eliminar</button>
+        <div class="actions-left">
+          <button (click)="onOpen(c.id!)" class="open-button">
+            <i class="fas fa-eye"></i>
+            Abrir
+          </button>
+        </div>
+        <div class="actions-right">
+          <button (click)="onEdit(c.id!)" class="edit-button">
+            <i class="fas fa-edit"></i>
+            Editar
+          </button>
+          <button (click)="onDelete(c.id!)" class="delete-button">
+            <i class="fas fa-trash"></i>
+            Eliminar
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<app-contact-details
+  *ngIf="showDetails"
+  [contact]="selectedContact"
+  [onClose]="closeDetails.bind(this)">
+</app-contact-details>

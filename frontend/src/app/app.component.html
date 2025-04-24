@@ -4,7 +4,7 @@
       <h1 class="app-title">
         <i class="fas fa-address-book"></i>
         App de Contactos
-        <span *ngIf="username" class="user-greeting">
+        <span *ngIf="isLoggedIn" class="user-greeting">
           ¡Hola, {{ username }}!
         </span>
       </h1>
@@ -33,7 +33,7 @@
 
   <footer class="app-footer">
     <div class="footer-content">
-      <p>&copy; 2025 App de Contactos</p>
+      © {{ currentYear }} App de Contactos. Todos los derechos reservados.
     </div>
   </footer>
 </div>

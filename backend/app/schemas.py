@@ -1,21 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, validator, ConfigDict
 from typing import Optional, List
-from enum import Enum
-
-# Enumeración de parentesco
-class ParentescoEnum(str, Enum):
-    amigo = "Amigo"
-    hermano = "Hermano"
-    pareja = "Pareja"
-    compañero_trabajo = "Compañero de trabajo"
-    otro = "Otro"
-
-# Enumeración de categorías
-class CategoriaEnum(str, Enum):
-    profesional = "Profesional"
-    utilidad = "Utilidad"
-    academico = "Academico"
-    otro = "Otro"
+from .models import ParentescoEnum, CategoriaEnum  # Importar desde models.py
 
 # Clase base para Contacto
 class ContactBase(BaseModel):
@@ -29,20 +14,28 @@ class ContactBase(BaseModel):
     telefono: str = Field(
         ...,
         pattern=r'^\+?[0-9]{7,15}$',  # Cambié `regex` por `pattern`
-        description="Teléfono con código internacional opcional, 7–15 dígitos"
+        description="Teléfono (7-15 dígitos, puede incluir +)"
     )  # Validación por expresión regular
 
     email: Optional[EmailStr] = None
     direccion: Optional[str] = None
     lugar: Optional[str] = None
     parentesco: Optional[ParentescoEnum] = None
+    parentescoOtro: Optional[str] = Field(None, min_length=2, max_length=50)
     categoria: Optional[CategoriaEnum] = None
+    categoriaOtro: Optional[str] = Field(None, min_length=2, max_length=50)
 
-    @validator("nombre")
-    @classmethod
-    def nombre_sin_numeros(cls, v: str) -> str:
-        if any(char.isdigit() for char in v):
-            raise ValueError("El nombre no puede contener números")
+    # Validadores modificados para ser más claros
+    @validator('parentescoOtro')
+    def validate_parentesco_otro(cls, v, values):
+        if values.get('parentesco') == 'Otro' and not v:
+            raise ValueError('parentescoOtro es requerido cuando parentesco es "Otro"')
+        return v
+
+    @validator('categoriaOtro')
+    def validate_categoria_otro(cls, v, values):
+        if values.get('categoria') == 'Otro' and not v:
+            raise ValueError('categoriaOtro es requerido cuando categoria es "Otro"')
         return v
 
 # Clase para crear un nuevo contacto (sin cambios respecto a ContactBase)

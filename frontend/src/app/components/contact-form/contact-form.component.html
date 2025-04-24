@@ -29,9 +29,9 @@
 
     <div class="form-field">
       <label>Teléfono:</label>
-      <input formControlName="telefono" type="text" placeholder="Ingresa el teléfono" />
-      <div *ngIf="form.get('telefono')?.invalid && form.get('telefono')?.touched" class="error">
-        El teléfono es obligatorio.
+      <input formControlName="telefono" type="text" placeholder="Ej: +573001234567" />
+      <div *ngIf="form.get('telefono')?.errors?.['pattern'] && form.get('telefono')?.touched" class="error">
+        El teléfono debe tener entre 7 y 15 dígitos, opcionalmente con el símbolo +
       </div>
     </div>
 
@@ -57,20 +57,44 @@
       <label>Parentesco:</label>
       <select formControlName="parentesco">
         <option value="" disabled selected>Selecciona un parentesco</option>
-        <option *ngFor="let option of ['Amigo', 'Hermano', 'Pareja', 'Compañero de trabajo', 'Otro']" [value]="option">
+        <option *ngFor="let option of parentescoOptions" [value]="option">
           {{ option }}
         </option>
       </select>
+    </div>
+
+    <div class="form-field" *ngIf="form.get('parentesco')?.value === 'Otro'">
+      <label>Especifica el parentesco:</label>
+      <input
+        formControlName="parentescoOtro"
+        type="text"
+        placeholder="Ingresa el parentesco"
+      />
+      <div *ngIf="form.get('parentescoOtro')?.errors?.['required'] && form.get('parentescoOtro')?.touched" class="error">
+        Este campo es obligatorio cuando seleccionas "Otro".
+      </div>
     </div>
 
     <div class="form-field">
       <label>Categoría:</label>
       <select formControlName="categoria">
         <option value="" disabled selected>Selecciona una categoría</option>
-        <option *ngFor="let option of ['Profesional', 'Utilidad', 'Academico', 'Otro']" [value]="option">
+        <option *ngFor="let option of categoriaOptions" [value]="option">
           {{ option }}
         </option>
       </select>
+    </div>
+
+    <div class="form-field" *ngIf="form.get('categoria')?.value === 'Otro'">
+      <label>Especifica la categoría:</label>
+      <input
+        formControlName="categoriaOtro"
+        type="text"
+        placeholder="Ingresa la categoría"
+      />
+      <div *ngIf="form.get('categoriaOtro')?.errors?.['required'] && form.get('categoriaOtro')?.touched" class="error">
+        Este campo es obligatorio cuando seleccionas "Otro".
+      </div>
     </div>
 
     <div class="form-actions">

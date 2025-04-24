@@ -1,20 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from .database import Base
-import enum
-
-class ParentescoEnum(str, enum.Enum):
-    amigo = "Amigo"
-    hermano = "Hermano"
-    pareja = "Pareja"
-    compañero_trabajo = "Compañero de trabajo"
-    otro = "Otro"
-
-class CategoriaEnum(str, enum.Enum):
-    profesional = "Profesional"
-    utilidad = "Utilidad"
-    academico = "Academico"
-    otro = "Otro"
+from .models import ParentescoEnum, CategoriaEnum  # Importar desde models.py
 
 class User(Base):
     __tablename__ = "users"
@@ -34,7 +21,9 @@ class ContactModel(Base):
     email = Column(String, nullable=True)
     direccion = Column(String, nullable=True)
     lugar = Column(String, nullable=True)
-    parentesco = Column(String, nullable=True)
-    categoria = Column(String, nullable=True)
+    parentesco = Column(Enum(ParentescoEnum), nullable=True)  # Usar el enum importado
+    parentescoOtro = Column(String, nullable=True)
+    categoria = Column(Enum(CategoriaEnum), nullable=True)    # Usar el enum importado
+    categoriaOtro = Column(String, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="contacts")

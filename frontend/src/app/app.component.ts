@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -14,19 +15,23 @@ export class AppComponent implements OnInit {
   username: string | null = null;
   isLoggedIn = false;
   theme: 'light' | 'dark' = 'light';
+  currentYear = new Date().getFullYear(); // Añadir esta línea
 
-  constructor(private authService: AuthService) {
-    // Recuperar el tema guardado o usar el predeterminado
+  constructor(private authService: AuthService, private router: Router) {
     const savedTheme = localStorage.getItem('theme');
     this.theme = (savedTheme === 'dark' ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', this.theme);
   }
 
   ngOnInit() {
+    // Verificar estado de autenticación y suscribirse a cambios
     this.authService.user$.subscribe(user => {
       this.isLoggedIn = !!user;
       this.username = user?.username || null;
     });
+
+    // Verificar sesión existente
+    this.authService.checkAndRestoreSession();
   }
 
   toggleTheme() {

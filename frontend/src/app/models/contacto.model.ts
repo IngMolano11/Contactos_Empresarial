@@ -1,5 +1,5 @@
-export type Parentesco = 'Amigo' | 'Hermano' | 'Pareja' | 'Compañero de trabajo' | 'Otro';
-export type Categoria = 'Profesional' | 'Utilidad' | 'Academico' | 'Otro';
+export type Parentesco = 'Familiar' | 'Amoroso' | 'Amistad' | 'Laboral' | 'Educativo' | 'Otro';
+export type Categoria = 'Personal' | 'Profesional' | 'Educativo' | 'Social' | 'Salud' | 'Financiero' | 'Emergencia' | 'Otro';
 
 export interface Contacto {
     id?: number;
@@ -9,5 +9,7 @@ export interface Contacto {
     direccion?: string;
     lugar?: string;
     parentesco?: Parentesco;
+    parentescoOtro?: string;
     categoria?: Categoria;
+    categoriaOtro?: string;
 }

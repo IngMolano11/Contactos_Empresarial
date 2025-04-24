@@ -28,6 +28,8 @@ export class ContactFormComponent implements OnInit {
   successMessage: string | null = null;
   isEditing = false;
   contactId?: number;
+  parentescoOptions = ['Familiar', 'Amoroso', 'Amistad', 'Laboral', 'Educativo', 'Otro'];
+  categoriaOptions = ['Personal', 'Profesional', 'Educativo', 'Social', 'Salud', 'Financiero', 'Emergencia', 'Otro'];
 
   @Input() contacto?: Contacto;             // recibe datos del padre :contentReference[oaicite:0]{index=0}
   @Output() saved = new EventEmitter<void>(); // emite evento al padre :contentReference[oaicite:1]{index=1}
@@ -39,13 +41,39 @@ export class ContactFormComponent implements OnInit {
     private router: Router
   ) {
     this.form = this.fb.group({
-      nombre: ['', Validators.required],
-      telefono: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      nombre: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      telefono: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{7,15}$/)]],
+      email: ['', [Validators.email]],
       direccion: [''],
       lugar: [''],
       parentesco: [''],
-      categoria: ['']
+      parentescoOtro: [''],
+      categoria: [''],
+      categoriaOtro: ['']
+    });
+
+    // Observar cambios en parentesco
+    this.form.get('parentesco')?.valueChanges.subscribe(value => {
+      const otroControl = this.form.get('parentescoOtro');
+      if (value === 'Otro') {
+        otroControl?.setValidators(Validators.required);
+      } else {
+        otroControl?.clearValidators();
+        otroControl?.setValue('');
+      }
+      otroControl?.updateValueAndValidity();
+    });
+
+    // Observar cambios en categoria
+    this.form.get('categoria')?.valueChanges.subscribe(value => {
+      const otroControl = this.form.get('categoriaOtro');
+      if (value === 'Otro') {
+        otroControl?.setValidators(Validators.required);
+      } else {
+        otroControl?.clearValidators();
+        otroControl?.setValue('');
+      }
+      otroControl?.updateValueAndValidity();
     });
   }
 
@@ -78,30 +106,42 @@ export class ContactFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.valid) {
+      console.log('Formulario a enviar:', this.form.value);
       this.loading = true;
       this.errorMessage = null;
       this.successMessage = null;
 
+      const contactData = {
+        nombre: this.form.value.nombre,
+        telefono: this.form.value.telefono,
+        email: this.form.value.email || null,
+        direccion: this.form.value.direccion || null,
+        lugar: this.form.value.lugar || null,
+        parentesco: this.form.value.parentesco || null,
+        parentescoOtro: this.form.value.parentescoOtro || null,
+        categoria: this.form.value.categoria || null,
+        categoriaOtro: this.form.value.categoriaOtro || null
+      };
+
+      // Determinar si estamos creando o actualizando
       const request$ = this.isEditing && this.contactId
-        ? this.service.update(this.contactId, this.form.value)
-        : this.service.create(this.form.value);
+        ? this.service.update(this.contactId, contactData)
+        : this.service.create(contactData);
 
       request$.subscribe({
-        next: () => {
-          this.successMessage = 'Contacto guardado exitosamente';
+        next: (response) => {
+          console.log('Contacto guardado:', response);
+          this.successMessage = `Contacto ${this.isEditing ? 'actualizado' : 'creado'} exitosamente`;
           this.loading = false;
-          // Redirigir a la lista después de guardar
+          // Navegar de vuelta a la lista después de un breve delay
           setTimeout(() => this.router.navigate(['/contactos']), 1500);
         },
-        error: (err) => {
-          console.error('Error:', err);
-          this.errorMessage = `Error al ${this.isEditing ? 'actualizar' : 'crear'} el contacto`;
+        error: (error) => {
+          console.error('Error:', error);
+          this.errorMessage = error.error?.detail || `Error al ${this.isEditing ? 'actualizar' : 'crear'} el contacto`;
           this.loading = false;
         }
       });
-    } else {
-      this.errorMessage = 'Por favor, complete todos los campos obligatorios.';
-      this.successMessage = null;
     }
   }
 

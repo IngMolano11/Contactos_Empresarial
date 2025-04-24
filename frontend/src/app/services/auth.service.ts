@@ -23,15 +23,7 @@ export class AuthService {
   private userSubject = new BehaviorSubject<UserData | null>(null);
   user$ = this.userSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      this.userSubject.next(JSON.parse(userData));
-    }
-  }
+  constructor(private http: HttpClient, private router: Router) {}
 
   signup(credentials: any): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.authUrl}/signup`, credentials);
@@ -52,15 +44,54 @@ export class AuthService {
     );
   }
 
+  checkAndRestoreSession() {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+
+    if (!token || !userData) {
+      this.clearSession();
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    try {
+      const tokenData = JSON.parse(atob(token.split('.')[1]));
+      const expirationDate = new Date(tokenData.exp * 1000);
+
+      if (expirationDate < new Date()) {
+        this.clearSession();
+        this.router.navigate(['/login']);
+      } else {
+        // Restaurar la sesión si el token es válido
+        this.userSubject.next(JSON.parse(userData));
+      }
+    } catch {
+      this.clearSession();
+      this.router.navigate(['/login']);
+    }
+  }
+
+  private clearSession() {
+    localStorage.clear();
+    this.userSubject.next(null);
+  }
+
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.clear();
     this.userSubject.next(null);
     this.router.navigate(['/login']);
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+
+    try {
+      const tokenData = JSON.parse(atob(token.split('.')[1]));
+      return new Date(tokenData.exp * 1000) > new Date();
+    } catch {
+      return false;
+    }
   }
 
   getToken(): string | null {

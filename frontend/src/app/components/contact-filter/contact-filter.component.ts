@@ -1,11 +1,14 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Parentesco, Categoria } from '../../models/contacto.model';
 
-interface FilterCriteria {
+export interface FilterCriteria {
   searchTerm: string;
-  parentesco: string;
-  categoria: string;
+  parentesco: Parentesco | '';
+  parentescoOtro?: string;
+  categoria: Categoria | '';
+  categoriaOtro?: string;
 }
 
 @Component({
@@ -20,13 +23,20 @@ interface FilterCriteria {
 })
 export class ContactFilterComponent {
   searchTerm: string = '';
-  selectedParentesco: string = '';
-  selectedCategoria: string = '';
+  selectedParentesco: Parentesco | '' = '';
+  selectedCategoria: Categoria | '' = '';
 
-  parentescoOptions = ['Amigo', 'Hermano', 'Pareja', 'Compañero de trabajo', 'Otro'];
-  categoriaOptions = ['Profesional', 'Utilidad', 'Academico', 'Otro'];
+  parentescoOptions: Parentesco[] = ['Familiar', 'Amoroso', 'Amistad', 'Laboral', 'Educativo', 'Otro'];
+  categoriaOptions: Categoria[] = ['Personal', 'Profesional', 'Educativo', 'Social', 'Salud', 'Financiero', 'Emergencia', 'Otro'];
 
   @Output() filterChange = new EventEmitter<FilterCriteria>();
+
+  // Añadir método para verificar si hay filtros activos
+  isFiltering(): boolean {
+    return this.searchTerm !== '' ||
+           this.selectedParentesco !== '' ||
+           this.selectedCategoria !== '';
+  }
 
   onFilterChange() {
     this.filterChange.emit({

@@ -7,14 +7,19 @@
       [(ngModel)]="searchTerm"
       (ngModelChange)="onFilterChange()"
       placeholder="Buscar por nombre, teléfono o email..."
+      aria-label="Buscar contactos"
     >
-    <i class="search-icon"></i>
+    <div class="search-icon"></div>
   </div>
 
-  <div class="filter-options">
+  <div class="filter-bottom-section">
     <div class="filter-select">
-      <label>Parentesco</label>
-      <select [(ngModel)]="selectedParentesco" (ngModelChange)="onFilterChange()">
+      <label for="parentesco-select">Parentesco</label>
+      <select
+        id="parentesco-select"
+        [(ngModel)]="selectedParentesco"
+        (ngModelChange)="onFilterChange()"
+      >
         <option value="">Todos los parentescos</option>
         <option *ngFor="let option of parentescoOptions" [value]="option">
           {{ option }}
@@ -23,8 +28,12 @@
     </div>
 
     <div class="filter-select">
-      <label>Categoría</label>
-      <select [(ngModel)]="selectedCategoria" (ngModelChange)="onFilterChange()">
+      <label for="categoria-select">Categoría</label>
+      <select
+        id="categoria-select"
+        [(ngModel)]="selectedCategoria"
+        (ngModelChange)="onFilterChange()"
+      >
         <option value="">Todas las categorías</option>
         <option *ngFor="let option of categoriaOptions" [value]="option">
           {{ option }}
@@ -32,10 +41,12 @@
       </select>
     </div>
 
-    <div class="button-container">
-      <button class="reset-button" (click)="resetFilters()">
-        Reiniciar filtros
-      </button>
-    </div>
+    <button
+      class="reset-button"
+      (click)="resetFilters()"
+      [disabled]="!isFiltering()"
+    >
+      Reiniciar filtros
+    </button>
   </div>
 </div>

@@ -2,8 +2,23 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Contacto } from '../models/contacto.model';
 import { environment } from '../../environments/environment';
+
+export type Parentesco = 'Familiar' | 'Amoroso' | 'Amistad' | 'Laboral' | 'Educativo' | 'Otro';
+export type Categoria = 'Personal' | 'Profesional' | 'Educativo' | 'Social' | 'Salud' | 'Financiero' | 'Emergencia' | 'Otro';
+
+export interface Contacto {
+  id?: number;
+  nombre: string;
+  telefono: string;
+  email?: string;
+  direccion?: string;
+  lugar?: string;
+  parentesco?: Parentesco;
+  parentescoOtro?: string;
+  categoria?: Categoria;
+  categoriaOtro?: string;
+}
 
 interface PaginatedResponse {
   data: Contacto[];
@@ -33,25 +48,25 @@ export class ContactService {
   }
 
   create(contacto: Contacto): Observable<Contacto> {
-    // Asegurar que los campos opcionales sean undefined si están vacíos
-    const payload = {
-      ...contacto,
-      email: contacto.email || undefined,
-      direccion: contacto.direccion || undefined,
-      lugar: contacto.lugar || undefined,
-      parentesco: contacto.parentesco || undefined,
-      categoria: contacto.categoria || undefined
-    };
-
-    console.log('Enviando contacto:', payload); // Debug
-    return this.http.post<Contacto>(this.API, payload).pipe(
-      catchError(this.handleError)
+    console.log('Intentando crear contacto:', contacto);
+    return this.http.post<Contacto>(this.API, contacto).pipe(
+      catchError(error => {
+        console.error('Error al crear contacto:', error);
+        if (error.status === 422) {
+          console.error('Error de validación:', error.error);
+        }
+        return throwError(() => error);
+      })
     );
   }
 
   update(id: number, contacto: Contacto): Observable<Contacto> {
+    console.log('Actualizando contacto:', id, contacto);
     return this.http.put<Contacto>(`${this.API}/${id}`, contacto).pipe(
-      catchError(this.handleError)
+      catchError(error => {
+        console.error('Error al actualizar contacto:', error);
+        return throwError(() => error);
+      })
     );
   }
 

@@ -5,6 +5,7 @@ import { Contacto } from '../../models/contacto.model';
 import { ContactService } from '../../services/contact.service';
 import { Router, RouterModule } from '@angular/router';
 import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
+import { ContactDetailsComponent } from '../contact-details/contact-details.component';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 interface FilterCriteria {
@@ -19,7 +20,8 @@ interface FilterCriteria {
   imports: [
     CommonModule,
     RouterModule,
-    ContactFilterComponent
+    ContactFilterComponent,
+    ContactDetailsComponent
   ],
   templateUrl: './contact-list.component.html',
   styleUrls: ['./contact-list.component.css'],
@@ -47,6 +49,8 @@ export class ContactListComponent implements OnInit {
   contacts: Contacto[] = [];
   filteredContacts: Contacto[] = [];
   showFilters: boolean = false; // Añadir esta propiedad
+  selectedContact?: Contacto;
+  showDetails = false;
 
   constructor(
     private service: ContactService,
@@ -132,5 +136,18 @@ export class ContactListComponent implements OnInit {
 
   toggleFilters() {
     this.showFilters = !this.showFilters;
+  }
+
+  onOpen(id: number) {
+    const contact = this.contacts.find(c => c.id === id);
+    if (contact) {
+      this.selectedContact = contact;
+      this.showDetails = true;
+    }
+  }
+
+  closeDetails() {
+    this.showDetails = false;
+    this.selectedContact = undefined;
   }
 }
