@@ -1,6 +1,19 @@
 <div class="form-container">
   <h2>{{ isEditing ? 'Editar' : 'Nuevo' }} Contacto</h2>
 
+  <div class="form-instructions" *ngIf="!isEditing">
+    <p>Para crear un nuevo contacto necesitas:</p>
+    <ul>
+      <li [class.completed]="form.get('nombre')?.valid">Nombre del contacto</li>
+      <li [class.completed]="form.get('telefono')?.valid">Número de teléfono</li>
+      <li class="optional">Email</li>
+      <li class="optional">Dirección (opcional)</li>
+      <li class="optional">Lugar (opcional)</li>
+      <li class="optional">Parentesco (opcional)</li>
+      <li class="optional">Categoría (opcional)</li>
+    </ul>
+  </div>
+
   <div *ngIf="loading" class="loading">
     Cargando...
   </div>

@@ -23,9 +23,11 @@ def ping():
 )
 def create_contacto(
     contacto: schemas.ContactCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
 ):
-    return crud.create_contact(db, contacto)
+    user = crud.get_user_by_email(db, current_user)
+    return crud.create_contact(db, contacto, user.id)
 
 # ------------------ LISTAR CONTACTOS ------------------
 # Ahora acepta GET /api/contactos  y GET /api/contactos/

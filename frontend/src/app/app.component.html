@@ -1,6 +1,39 @@
-<nav>
-  <h1>{{ title }}</h1>
-</nav>
-<div class="content">
-  <router-outlet></router-outlet>
+<div class="app-container" [attr.data-theme]="theme">
+  <header class="app-header">
+    <div class="header-content">
+      <h1 class="app-title">
+        <i class="fas fa-address-book"></i>
+        App de Contactos
+        <span *ngIf="username" class="user-greeting">
+          ¡Hola, {{ username }}!
+        </span>
+      </h1>
+      <div class="header-actions">
+        <button
+          class="btn btn-theme"
+          (click)="toggleTheme()"
+          [attr.aria-label]="theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+          <i [class]="theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'"></i>
+        </button>
+        <button
+          *ngIf="isLoggedIn"
+          class="btn btn-logout"
+          (click)="logout()"
+          aria-label="Cerrar sesión">
+          <i class="fas fa-sign-out-alt"></i>
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>&copy; 2025 App de Contactos</p>
+    </div>
+  </footer>
 </div>

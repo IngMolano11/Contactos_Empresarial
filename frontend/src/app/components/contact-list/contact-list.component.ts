@@ -72,17 +72,29 @@ export class ContactListComponent implements OnInit {
   }
 
   onDelete(id: number) {
-    if (confirm('¿Eliminar contacto?')) {
+    const confirmation = confirm('¿Estás seguro que deseas eliminar este contacto? Esta acción no se puede deshacer.');
+    if (confirmation) {
       this.service.delete(id).subscribe({
         next: () => {
           this.contacts = this.contacts.filter(c => c.id !== id);
           this.filteredContacts = this.contacts;
+          // Mostrar mensaje de éxito
+          this.showSuccessMessage('Contacto eliminado correctamente');
         },
         error: (error) => {
           console.error('Error al eliminar:', error);
+          this.showErrorMessage('No se pudo eliminar el contacto');
         }
       });
     }
+  }
+
+  showSuccessMessage(message: string) {
+    // Implementar un sistema de notificaciones toast
+  }
+
+  showErrorMessage(message: string) {
+    // Implementar un sistema de notificaciones toast
   }
 
   onEdit(id: number) {

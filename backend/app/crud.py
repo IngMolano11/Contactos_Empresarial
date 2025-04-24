@@ -15,16 +15,11 @@ def get_contacts(db: Session, skip: int = 0, limit: int = 100):
     """
     return db.query(models_db.ContactModel).offset(skip).limit(limit).all()
 
-def create_contact(db: Session, contacto: schemas.ContactCreate):
+def create_contact(db: Session, contacto: schemas.ContactCreate, user_id: int):
     """
-    Crea un nuevo contacto si no existe un correo duplicado.
+    Crea un nuevo contacto asociado a un usuario.
     """
-    # Verifica si el correo ya está registrado
-    if db.query(models_db.ContactModel).filter(models_db.ContactModel.email == contacto.email).first():
-        raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
-    
-    # Crea el nuevo contacto si el correo no está registrado
-    db_contact = models_db.ContactModel(**contacto.dict())
+    db_contact = models_db.ContactModel(**contacto.dict(), owner_id=user_id)
     db.add(db_contact)
     db.commit()
     db.refresh(db_contact)
@@ -56,6 +51,12 @@ def delete_contact(db: Session, contacto_id: int):
     db.commit()
     return contacto_db
 
+def get_user_by_email(db: Session, email: str):
+    """
+    Obtiene un usuario por su email
+    """
+    return db.query(models_db.User).filter(models_db.User.email == email).first()
+
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = get_password_hash(user.password)
     db_user = models_db.User(
@@ -69,13 +70,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 def authenticate_user(db: Session, email: str, password: str):
-    user = db.query(models_db.User).filter(models_db.User.email == email).first()
+    user = get_user_by_email(db, email)
     if not user or not verify_password(password, user.hashed_password):
         return None
     return user
-
-def get_user_by_email(db: Session, email: str):
-    """
-    Obtiene un usuario por su email
-    """
-    return db.query(models_db.User).filter(models_db.User.email == email).first()
