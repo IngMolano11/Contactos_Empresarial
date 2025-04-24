@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, schemas, models_db
 from app.deps import get_db
+from app.auth import create_access_token, get_current_user
 
 router = APIRouter()
 
@@ -38,8 +39,10 @@ def read_contactos(
     limit: int = Query(100, ge=1),
     q: Optional[str] = Query(None, title="Query de búsqueda", description="Filtra contactos por nombre o email"),
     db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
 ):
-    query = db.query(models_db.ContactModel)
+    user = crud.get_user_by_email(db, current_user)
+    query = db.query(models_db.ContactModel).filter(models_db.ContactModel.owner_id == user.id)
     if q:
         query = query.filter(
             (models_db.ContactModel.nombre.ilike(f"%{q}%")) |
@@ -89,3 +92,19 @@ def delete_contacto(contacto_id: int, db: Session = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contacto no encontrado")
     return None
+
+# ------------------ SIGNUP ------------------
+@router.post("/signup", response_model=schemas.Token)
+def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = crud.create_user(db, user)
+    access_token = create_access_token(data={"sub": db_user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# ------------------ LOGIN ------------------
+@router.post("/login", response_model=schemas.Token)
+def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
+    user = crud.authenticate_user(db, user_credentials.email, user_credentials.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
+    access_token = create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app import models_db, schemas
+from app.auth import get_password_hash, verify_password
 
 def get_contact(db: Session, contacto_id: int):
     """
@@ -54,3 +55,27 @@ def delete_contact(db: Session, contacto_id: int):
     db.delete(contacto_db)
     db.commit()
     return contacto_db
+
+def create_user(db: Session, user: schemas.UserCreate):
+    hashed_password = get_password_hash(user.password)
+    db_user = models_db.User(
+        email=user.email,
+        username=user.username,
+        hashed_password=hashed_password
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def authenticate_user(db: Session, email: str, password: str):
+    user = db.query(models_db.User).filter(models_db.User.email == email).first()
+    if not user or not verify_password(password, user.hashed_password):
+        return None
+    return user
+
+def get_user_by_email(db: Session, email: str):
+    """
+    Obtiene un usuario por su email
+    """
+    return db.query(models_db.User).filter(models_db.User.email == email).first()

@@ -1,5 +1,3 @@
-# backend/app/main.py
-
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -9,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine
 from app.models_db import Base
 from app.routes import router as contactos_router
+from app.auth_routes import router as auth_router  # Añadir esta línea
 
 # --- Crea tablas en la base de datos al iniciar ---
 Base.metadata.create_all(bind=engine)
@@ -52,4 +51,7 @@ async def ping():
     return {"ping": "pong"}
 
 # --- Monta el router de contactos en /api/contactos ---
-app.include_router(contactos_router, prefix="/api/contactos")
+app.include_router(contactos_router, prefix="/api/contactos", tags=["Contactos"])
+
+# Montar rutas de autenticación
+app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])

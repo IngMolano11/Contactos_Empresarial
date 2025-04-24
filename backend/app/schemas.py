@@ -66,3 +66,23 @@ class PaginatedContacts(BaseModel):
     skip: int                # Cuántos registros se omitieron
     limit: int               # Tamaño de página solicitado
     data: List[ContactInDB]  # Lista de contactos paginados
+
+class UserBase(BaseModel):
+    email: EmailStr
+    username: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserInDB(UserBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

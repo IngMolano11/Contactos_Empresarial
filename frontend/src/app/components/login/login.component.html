@@ -1,0 +1,48 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button [class.active]="!isSignup" (click)="toggleMode(false)">Iniciar Sesión</button>
+      <button [class.active]="isSignup" (click)="toggleMode(true)">Registrarse</button>
+    </div>
+
+    <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+      <div class="form-field" *ngIf="isSignup">
+        <label>Usuario:</label>
+        <input formControlName="username" type="text" placeholder="Ingresa tu usuario">
+        <div *ngIf="authForm.get('username')?.errors?.['required'] && authForm.get('username')?.touched" class="error-message">
+          El usuario es requerido
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Email:</label>
+        <input formControlName="email" type="email" placeholder="Ingresa tu email">
+        <div *ngIf="authForm.get('email')?.errors?.['required'] && authForm.get('email')?.touched" class="error-message">
+          El email es requerido
+        </div>
+        <div *ngIf="authForm.get('email')?.errors?.['email'] && authForm.get('email')?.touched" class="error-message">
+          Email inválido
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Contraseña:</label>
+        <input formControlName="password" type="password" placeholder="Ingresa tu contraseña">
+        <div *ngIf="authForm.get('password')?.errors?.['required'] && authForm.get('password')?.touched" class="error-message">
+          La contraseña es requerida
+        </div>
+        <div *ngIf="authForm.get('password')?.errors?.['minlength'] && authForm.get('password')?.touched" class="error-message">
+          La contraseña debe tener al menos 6 caracteres
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="authForm.invalid || loading">
+        {{ isSignup ? 'Registrarse' : 'Iniciar Sesión' }}
+      </button>
+
+      <div *ngIf="error" class="error-alert">
+        {{ error }}
+      </div>
+    </form>
+  </div>
+</div>

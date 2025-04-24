@@ -1,9 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, map } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Contacto } from '../models/contacto.model';
 import { environment } from '../../environments/environment';
+
+interface PaginatedResponse {
+  data: Contacto[];
+  total: number;
+  skip: number;
+  limit: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -14,19 +21,13 @@ export class ContactService {
   constructor(private http: HttpClient) {}
 
   private handleError(error: HttpErrorResponse) {
-    console.error('Error detallado:', error);
-    return throwError(() => {
-      const message = error.error?.detail || 'Error desconocido';
-      return new Error(message);
-    });
+    console.error('Error occurred:', error);
+    return throwError(() => error);
   }
 
   getAll(): Observable<Contacto[]> {
-    return this.http.get<{ data: Contacto[] }>(this.API).pipe(
-      map(response => {
-        console.log('Respuesta del servidor:', response);
-        return response.data || [];
-      }),
+    return this.http.get<PaginatedResponse>(this.API).pipe(
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
@@ -61,6 +62,8 @@ export class ContactService {
   }
 
   getById(id: number): Observable<Contacto> {
-    return this.http.get<Contacto>(`${this.API}/${id}`);
+    return this.http.get<Contacto>(`${this.API}/${id}`).pipe(
+      catchError(this.handleError)
+    );
   }
 }

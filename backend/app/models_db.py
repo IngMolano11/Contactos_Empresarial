@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Integer, String, Enum
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from .database import Base
 import enum
-
-Base = declarative_base()
 
 class ParentescoEnum(str, enum.Enum):
     amigo = "Amigo"
@@ -17,14 +16,25 @@ class CategoriaEnum(str, enum.Enum):
     academico = "Academico"
     otro = "Otro"
 
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    username = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    contacts = relationship("ContactModel", back_populates="owner")
+
 class ContactModel(Base):
     __tablename__ = "contacts"
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String, index=True, nullable=False)
-    telefono = Column(String, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=True)
+    nombre = Column(String, index=True)
+    telefono = Column(String)
+    email = Column(String, nullable=True)
     direccion = Column(String, nullable=True)
     lugar = Column(String, nullable=True)
-    parentesco = Column(Enum(ParentescoEnum), nullable=True)
-    categoria = Column(Enum(CategoriaEnum), nullable=True)
+    parentesco = Column(String, nullable=True)
+    categoria = Column(String, nullable=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner = relationship("User", back_populates="contacts")
