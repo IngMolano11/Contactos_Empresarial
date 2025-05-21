@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, validator, ConfigDict
 from typing import Optional, List
-from .models import ParentescoEnum, CategoriaEnum  # Importar desde models.py
+from .models import TipoContactoEnum, DetalleTipoEnum, TIPO_DETALLE_MAPPING
 
 # Clase base para Contacto
 class ContactBase(BaseModel):
@@ -11,6 +11,8 @@ class ContactBase(BaseModel):
         description="Nombre completo (2–50 caracteres)"
     )  # Validación de longitud mínima/máxima
 
+    imagen: Optional[str] = None
+
     telefono: str = Field(
         ...,
         pattern=r'^\+?[0-9]{7,15}$',  # Cambié `regex` por `pattern`
@@ -20,25 +22,33 @@ class ContactBase(BaseModel):
     email: Optional[EmailStr] = None
     direccion: Optional[str] = None
     lugar: Optional[str] = None
-    parentesco: Optional[ParentescoEnum] = None
-    parentescoOtro: Optional[str] = Field(None, min_length=2, max_length=50)
-    categoria: Optional[CategoriaEnum] = None
-    categoriaOtro: Optional[str] = Field(None, min_length=2, max_length=50)
+    tipo_contacto: Optional[TipoContactoEnum] = None
+    tipo_contacto_otro: Optional[str] = None
+    detalle_tipo: Optional[DetalleTipoEnum] = None
+    detalle_tipo_otro: Optional[str] = None
 
     # Validadores modificados para ser más claros
-    @validator('parentescoOtro')
-    def validate_parentesco_otro(cls, v, values):
-        if values.get('parentesco') == 'Otro' and not v:
-            raise ValueError('parentescoOtro es requerido cuando parentesco es "Otro"')
+    @validator('tipo_contacto')
+    def validate_tipo_contacto(cls, v):
+        if v and v not in [tipo.value for tipo in TipoContactoEnum]:
+            raise ValueError(f"Tipo de contacto debe ser uno de: {', '.join([tipo.value for tipo in TipoContactoEnum])}")
         return v
 
-    @validator('categoriaOtro')
-    def validate_categoria_otro(cls, v, values):
-        if values.get('categoria') == 'Otro' and not v:
-            raise ValueError('categoriaOtro es requerido cuando categoria es "Otro"')
+    @validator('detalle_tipo')
+    def validate_detalle_tipo(cls, v):
+        if v and v not in [detalle.value for detalle in DetalleTipoEnum]:
+            raise ValueError(f"Detalle de tipo debe ser uno de: {', '.join([detalle.value for detalle in DetalleTipoEnum])}")
         return v
 
-# Clase para crear un nuevo contacto (sin cambios respecto a ContactBase)
+    @validator('detalle_tipo_otro')
+    def validate_detalle_tipo_otro(cls, v, values):
+        if values.get('detalle_tipo') == DetalleTipoEnum.OTRO and not v:
+            raise ValueError('detalle_tipo_otro es requerido cuando detalle_tipo es "Otro"')
+        return v
+
+    model_config = ConfigDict(from_attributes=True)  # Esto es clave para SQLAlchemy
+
+# Clase para crear un nuevo contacto
 class ContactCreate(ContactBase):
     pass
 
@@ -49,16 +59,18 @@ class ContactUpdate(ContactBase):
 # Clase para representar un contacto en la base de datos
 class ContactInDB(ContactBase):
     id: int
-    
+    owner_id: int
+
     model_config = ConfigDict(from_attributes=True)
-    
-    
+
 # Clase de paginación para los contactos
 class PaginatedContacts(BaseModel):
     total: int               # Total de registros disponibles
     skip: int                # Cuántos registros se omitieron
     limit: int               # Tamaño de página solicitado
     data: List[ContactInDB]  # Lista de contactos paginados
+
+    model_config = ConfigDict(from_attributes=True)
 
 class UserBase(BaseModel):
     email: EmailStr

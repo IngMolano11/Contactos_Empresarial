@@ -9,14 +9,16 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContactService } from '../../services/contact.service';
-import { Contacto } from '../../models/contacto.model';
+import { Contacto, TipoContacto, DetalleTipo } from '../../models/contacto.model';
+import { Nl2brPipe } from '../../pipes/nl2br.pipe';
 
 @Component({
   selector: 'app-contact-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule  // para [formGroup] en la plantilla
+    ReactiveFormsModule,
+    Nl2brPipe
   ],
   templateUrl: './contact-form.component.html',
   styleUrls: ['./contact-form.component.css']
@@ -28,8 +30,24 @@ export class ContactFormComponent implements OnInit {
   successMessage: string | null = null;
   isEditing = false;
   contactId?: number;
-  parentescoOptions = ['Familiar', 'Amoroso', 'Amistad', 'Laboral', 'Educativo', 'Otro'];
-  categoriaOptions = ['Personal', 'Profesional', 'Educativo', 'Social', 'Salud', 'Financiero', 'Emergencia', 'Otro'];
+  imagePreview: string | null = null;
+  imageError: string | null = null;
+  selectedFile: File | null = null;
+
+  tipoContactoOptions = [
+    'Proveedor', 'Cliente', 'Empleado', 'Externo', 
+    'Socio', 'Aliado', 'Otro'
+  ];
+
+  detalleTipoMapping: { [key: string]: string[] } = {
+    'Proveedor': ['Mercancía', 'Servicios', 'Software', 'Insumos', 'Logística'],
+    'Cliente': ['Corporativo', 'Persona natural', 'Frecuente', 'Potencial'],
+    'Empleado': ['Administrativo', 'Operativo', 'Freelance', 'Temporal'],
+    'Externo': ['Consultor', 'Auditor', 'Contratista', 'Técnico'],
+    'Socio': ['Inversionista', 'Co-fundador', 'Representante legal'],
+    'Aliado': ['ONG', 'Entidad pública', 'Cámara de comercio', 'Universidad'],
+    'Otro': ['Otro']
+  };
 
   @Input() contacto?: Contacto;             // recibe datos del padre :contentReference[oaicite:0]{index=0}
   @Output() saved = new EventEmitter<void>(); // emite evento al padre :contentReference[oaicite:1]{index=1}
@@ -46,34 +64,33 @@ export class ContactFormComponent implements OnInit {
       email: ['', [Validators.email]],
       direccion: [''],
       lugar: [''],
-      parentesco: [''],
-      parentescoOtro: [''],
-      categoria: [''],
-      categoriaOtro: ['']
+      tipo_contacto: [''],
+      tipo_contacto_otro: [''],
+      detalle_tipo: [''],
+      detalle_tipo_otro: ['']
     });
 
-    // Observar cambios en parentesco
-    this.form.get('parentesco')?.valueChanges.subscribe(value => {
-      const otroControl = this.form.get('parentescoOtro');
+    // Observar cambios en tipo_contacto
+    this.form.get('tipo_contacto')?.valueChanges.subscribe(value => {
+      const detalleTipoControl = this.form.get('detalle_tipo');
+      detalleTipoControl?.setValue('');
+      
       if (value === 'Otro') {
-        otroControl?.setValidators(Validators.required);
+        this.form.get('tipo_contacto_otro')?.setValidators([Validators.required]);
       } else {
-        otroControl?.clearValidators();
-        otroControl?.setValue('');
+        this.form.get('tipo_contacto_otro')?.clearValidators();
       }
-      otroControl?.updateValueAndValidity();
+      this.form.get('tipo_contacto_otro')?.updateValueAndValidity();
     });
 
-    // Observar cambios en categoria
-    this.form.get('categoria')?.valueChanges.subscribe(value => {
-      const otroControl = this.form.get('categoriaOtro');
+    // Observar cambios en detalle_tipo
+    this.form.get('detalle_tipo')?.valueChanges.subscribe(value => {
       if (value === 'Otro') {
-        otroControl?.setValidators(Validators.required);
+        this.form.get('detalle_tipo_otro')?.setValidators([Validators.required]);
       } else {
-        otroControl?.clearValidators();
-        otroControl?.setValue('');
+        this.form.get('detalle_tipo_otro')?.clearValidators();
       }
-      otroControl?.updateValueAndValidity();
+      this.form.get('detalle_tipo_otro')?.updateValueAndValidity();
     });
   }
 
@@ -90,56 +107,98 @@ export class ContactFormComponent implements OnInit {
   }
 
   loadContact(id: number) {
-    this.loading = true;
     this.service.getById(id).subscribe({
-      next: (contacto) => {
+      next: (contacto: Contacto) => {
         this.form.patchValue(contacto);
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Error al cargar contacto:', error);
+      error: (error: any) => {
+        console.error('Error al cargar el contacto:', error);
         this.errorMessage = 'Error al cargar el contacto';
         this.loading = false;
       }
     });
   }
 
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      // Validar tipo de archivo
+      if (!file.type.match(/image\/(jpeg|png|gif|bmp|webp)/)) {
+        this.imageError = 'El archivo debe ser una imagen (JPG, PNG, GIF, BMP, WEBP)';
+        return;
+      }
+
+      // Validar tamaño (opcional, comentar si no quieres límite)
+      // if (file.size > 5 * 1024 * 1024) {
+      //   this.imageError = 'La imagen no debe superar los 5MB';
+      //   return;
+      // }
+
+      this.selectedFile = file;
+      this.imageError = null;
+
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result as string;
+      };
+      reader.onerror = () => {
+        this.imageError = 'Error al leer el archivo';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  getDetalleTipoOptions(tipoContacto: string): string[] {
+    return this.detalleTipoMapping[tipoContacto] || [];
+  }
+
   onSubmit(): void {
     if (this.form.valid) {
-      console.log('Formulario a enviar:', this.form.value);
       this.loading = true;
       this.errorMessage = null;
       this.successMessage = null;
 
-      const contactData = {
-        nombre: this.form.value.nombre,
-        telefono: this.form.value.telefono,
-        email: this.form.value.email || null,
-        direccion: this.form.value.direccion || null,
-        lugar: this.form.value.lugar || null,
-        parentesco: this.form.value.parentesco || null,
-        parentescoOtro: this.form.value.parentescoOtro || null,
-        categoria: this.form.value.categoria || null,
-        categoriaOtro: this.form.value.categoriaOtro || null
-      };
+      const formData = new FormData();
+      
+      // Agregar todos los campos del formulario
+      Object.keys(this.form.controls).forEach(key => {
+        const value = this.form.get(key)?.value;
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value);
+        }
+      });
 
-      // Determinar si estamos creando o actualizando
-      const request$ = this.isEditing && this.contactId
-        ? this.service.update(this.contactId, contactData)
-        : this.service.create(contactData);
+      // Agregar la imagen si existe
+      if (this.selectedFile) {
+        formData.append('imagen', this.selectedFile);
+      }
+
+      const request$ = this.isEditing 
+        ? this.service.update(this.contactId!, formData)
+        : this.service.create(formData);
 
       request$.subscribe({
         next: (response) => {
           console.log('Contacto guardado:', response);
           this.successMessage = `Contacto ${this.isEditing ? 'actualizado' : 'creado'} exitosamente`;
           this.loading = false;
-          // Navegar de vuelta a la lista después de un breve delay
+          this.saved.emit();
           setTimeout(() => this.router.navigate(['/contactos']), 1500);
         },
         error: (error) => {
           console.error('Error:', error);
-          this.errorMessage = error.error?.detail || `Error al ${this.isEditing ? 'actualizar' : 'crear'} el contacto`;
+          this.errorMessage = error;
           this.loading = false;
+        }
+      });
+    } else {
+      this.errorMessage = 'Por favor, complete todos los campos requeridos correctamente';
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        if (control?.invalid) {
+          control.markAsTouched();
         }
       });
     }

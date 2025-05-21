@@ -1,13 +1,34 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, status, File, UploadFile, Form
 from sqlalchemy.orm import Session
-
-from app import crud, schemas, models_db
-from app.deps import get_db
-from app.auth import create_access_token, get_current_user
-from .models import ParentescoEnum, CategoriaEnum
+from typing import List, Optional
+from pydantic import ValidationError
+import shutil
+import os
+from pathlib import Path
+from . import crud, models_db, models, schemas
+from .deps import get_db, get_current_user
+from .models import TipoContactoEnum, DetalleTipoEnum
 
 router = APIRouter()
+
+# Configuración para uploads
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True, parents=True)
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
+
+def validate_image(file: UploadFile) -> bool:
+    """Valida que el archivo sea una imagen"""
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": f"Formato de archivo no permitido. Use: {', '.join(ALLOWED_EXTENSIONS)}",
+                "field": "imagen",
+                "type": "validation_error"
+            }
+        )
+    return True
 
 # ------------------ ENDPOINT DE PRUEBA DE VIDA ------------------
 @router.get("/ping", tags=["Root"])
@@ -22,26 +43,96 @@ def ping():
     status_code=status.HTTP_201_CREATED,
     tags=["Contactos"]
 )
-def create_contacto(
-    contacto: schemas.ContactCreate,
+async def create_contacto(
+    nombre: str = Form(...),
+    telefono: str = Form(...),
+    email: Optional[str] = Form(None),
+    direccion: Optional[str] = Form(None),
+    lugar: Optional[str] = Form(None),
+    tipo_contacto: Optional[str] = Form(None),
+    tipo_contacto_otro: Optional[str] = Form(None),
+    detalle_tipo: Optional[str] = Form(None),
+    detalle_tipo_otro: Optional[str] = Form(None),
+    imagen: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user_email: str = Depends(get_current_user)
 ):
     try:
-        print("Datos recibidos:", contacto.dict())  # Log para depuración
-        user = crud.get_user_by_email(db, current_user)
-        return crud.create_contact(db, contacto, user.id)
-    except Exception as e:
-        print("Error al crear contacto:", str(e))  # Log para depuración
+        user = crud.get_user_by_email(db, current_user_email)
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            
+        # Procesar imagen si se proporciona
+        imagen_path = None
+        if imagen:
+            try:
+                validate_image(imagen)
+                file_extension = Path(imagen.filename).suffix.lower()
+                file_name = f"{user.id}_{nombre}_{os.urandom(8).hex()}{file_extension}"
+                file_path = UPLOAD_DIR / file_name
+                
+                with file_path.open("wb") as buffer:
+                    shutil.copyfileobj(imagen.file, buffer)
+                
+                imagen_path = f"/uploads/{file_name}"
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "message": f"Error al procesar la imagen: {str(e)}",
+                        "field": "imagen",
+                        "type": "upload_error"
+                    }
+                )
+
+        # Crear los datos del contacto
+        contact_data = schemas.ContactCreate(
+            nombre=nombre,
+            telefono=telefono,
+            email=email if email else None,
+            direccion=direccion if direccion else None,
+            lugar=lugar if lugar else None,
+            tipo_contacto=tipo_contacto if tipo_contacto else None,
+            tipo_contacto_otro=tipo_contacto_otro if tipo_contacto_otro else None,
+            detalle_tipo=detalle_tipo if detalle_tipo else None,
+            detalle_tipo_otro=detalle_tipo_otro if detalle_tipo_otro else None,
+            imagen=imagen_path
+        )
+
+        # Crear el contacto
+        try:
+            contact = crud.create_contact(db, contact_data, user.id)
+            return contact
+        except Exception as e:
+            # Si falla la creación del contacto, eliminar la imagen si se subió
+            if imagen_path:
+                try:
+                    os.remove(UPLOAD_DIR / Path(imagen_path).name)
+                except:
+                    pass
+            raise e
+
+    except ValidationError as e:
         raise HTTPException(
             status_code=422,
-            detail=str(e)
+            detail={
+                "message": "Error de validación",
+                "errors": e.errors()
+            }
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": f"Error al crear el contacto: {str(e)}",
+                "type": "server_error"
+            }
         )
 
 # ------------------ LISTAR CONTACTOS ------------------
 # Ahora acepta GET /api/contactos  y GET /api/contactos/
 @router.get(
-    "",  # ruta raíz del router: /api/contactos
+    "",
     response_model=schemas.PaginatedContacts,
     tags=["Contactos"]
 )
@@ -49,35 +140,50 @@ def read_contactos(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1),
     q: Optional[str] = None,
-    parentesco: Optional[ParentescoEnum] = None,
-    categoria: Optional[CategoriaEnum] = None,
+    tipo_contacto: Optional[str] = None,
+    detalle_tipo: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user_email: str = Depends(get_current_user)
 ):
-    user = crud.get_user_by_email(db, current_user)
-    query = db.query(models_db.ContactModel).filter(models_db.ContactModel.owner_id == user.id)
-    
-    if q:
-        query = query.filter(
-            (models_db.ContactModel.nombre.ilike(f"%{q}%")) |
-            (models_db.ContactModel.email.ilike(f"%{q}%"))
+    try:
+        user = crud.get_user_by_email(db, current_user_email)
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        query = db.query(models_db.Contact).filter(
+            models_db.Contact.owner_id == user.id
         )
-    
-    if parentesco:
-        query = query.filter(models_db.ContactModel.parentesco == parentesco)
-    
-    if categoria:
-        query = query.filter(models_db.ContactModel.categoria == categoria)
-    
-    total = query.count()
-    items = query.offset(skip).limit(limit).all()
-    
-    return schemas.PaginatedContacts(
-        total=total,
-        skip=skip,
-        limit=limit,
-        data=items
-    )
+        
+        if q:
+            query = query.filter(
+                (models_db.Contact.nombre.ilike(f"%{q}%")) |
+                (models_db.Contact.email.ilike(f"%{q}%")) |
+                (models_db.Contact.telefono.ilike(f"%{q}%"))
+            )
+        
+        if tipo_contacto:
+            query = query.filter(models_db.Contact.tipo_contacto == tipo_contacto)
+        
+        if detalle_tipo:
+            query = query.filter(models_db.Contact.detalle_tipo == detalle_tipo)
+        
+        total = query.count()
+        items = query.offset(skip).limit(limit).all()
+        
+        return {
+            "total": total,
+            "skip": skip,
+            "limit": limit,
+            "data": items
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": f"Error al obtener contactos: {str(e)}",
+                "type": "server_error"
+            }
+        )
 
 # ------------------ OBTENER CONTACTO POR ID ------------------
 @router.get(
@@ -85,11 +191,43 @@ def read_contactos(
     response_model=schemas.ContactInDB,
     tags=["Contactos"]
 )
-def read_contacto(contacto_id: int, db: Session = Depends(get_db)):
-    db_contacto = crud.get_contact(db, contacto_id)
-    if not db_contacto:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contacto no encontrado")
-    return db_contacto
+def read_contacto(
+    contacto_id: int, 
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user)
+):
+    try:
+        # Obtener el usuario actual
+        user = crud.get_user_by_email(db, current_user_email)
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "message": "Usuario no encontrado",
+                    "type": "not_found"
+                }
+            )
+
+        # Obtener el contacto
+        db_contacto = crud.get_contact(db, contacto_id, user.id)
+        if not db_contacto:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "message": "Contacto no encontrado",
+                    "type": "not_found"
+                }
+            )
+        return db_contacto
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": f"Error al obtener el contacto: {str(e)}",
+                "type": "server_error"
+            }
+        )
 
 # ------------------ ACTUALIZAR CONTACTO ------------------
 @router.put(
@@ -97,27 +235,77 @@ def read_contacto(contacto_id: int, db: Session = Depends(get_db)):
     response_model=schemas.ContactInDB,
     tags=["Contactos"]
 )
-def update_contacto(
-    contacto_id: int, 
-    contacto: schemas.ContactUpdate, 
+async def update_contacto(
+    contacto_id: int,
+    nombre: str = Form(...),
+    telefono: str = Form(...),
+    email: Optional[str] = Form(None),
+    direccion: Optional[str] = Form(None),
+    lugar: Optional[str] = Form(None),
+    tipo_contacto: Optional[str] = Form(None),
+    tipo_contacto_otro: Optional[str] = Form(None),
+    detalle_tipo: Optional[str] = Form(None),
+    detalle_tipo_otro: Optional[str] = Form(None),
+    imagen: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user_email: str = Depends(get_current_user)
 ):
     try:
-        print("Actualizando contacto:", contacto_id, contacto.dict())
-        user = crud.get_user_by_email(db, current_user)
-        updated = crud.update_contact(db, contacto_id, contacto)
-        if not updated:
-            raise HTTPException(
-                status_code=404,
-                detail="Contacto no encontrado"
-            )
-        return updated
+        # Obtener el usuario actual
+        user = crud.get_user_by_email(db, current_user_email)
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        # Verificar que el contacto existe y pertenece al usuario
+        contacto = crud.get_contact(db, contacto_id, user.id)
+        if not contacto:
+            raise HTTPException(status_code=404, detail="Contacto no encontrado")
+
+        # Procesar imagen si se proporciona una nueva
+        imagen_path = contacto.imagen
+        if imagen:
+            try:
+                validate_image(imagen)
+                # Eliminar imagen anterior si existe
+                if contacto.imagen:
+                    old_image_path = Path("uploads") / Path(contacto.imagen).name
+                    if old_image_path.exists():
+                        old_image_path.unlink()
+
+                file_extension = Path(imagen.filename).suffix.lower()
+                file_name = f"{user.id}_{nombre}_{os.urandom(8).hex()}{file_extension}"
+                file_path = UPLOAD_DIR / file_name
+                
+                with file_path.open("wb") as buffer:
+                    shutil.copyfileobj(imagen.file, buffer)
+                
+                imagen_path = f"/uploads/{file_name}"
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Error al procesar la imagen: {str(e)}"
+                )
+
+        # Actualizar datos del contacto
+        contact_data = schemas.ContactUpdate(
+            nombre=nombre,
+            telefono=telefono,
+            email=email,
+            direccion=direccion,
+            lugar=lugar,
+            tipo_contacto=tipo_contacto,
+            tipo_contacto_otro=tipo_contacto_otro,
+            detalle_tipo=detalle_tipo,
+            detalle_tipo_otro=detalle_tipo_otro,
+            imagen=imagen_path
+        )
+
+        return crud.update_contact(db, contacto_id, contact_data, user.id)
+
     except Exception as e:
-        print("Error al actualizar contacto:", str(e))
         raise HTTPException(
-            status_code=422,
-            detail=str(e)
+            status_code=500,
+            detail=f"Error al actualizar el contacto: {str(e)}"
         )
 
 # ------------------ ELIMINAR CONTACTO ------------------
@@ -126,11 +314,43 @@ def update_contacto(
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["Contactos"]
 )
-def delete_contacto(contacto_id: int, db: Session = Depends(get_db)):
-    deleted = crud.delete_contact(db, contacto_id)
-    if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contacto no encontrado")
-    return None
+async def delete_contacto(
+    contacto_id: int,
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user)
+):
+    try:
+        # Obtener el usuario actual
+        user = crud.get_user_by_email(db, current_user_email)
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "message": "Usuario no encontrado",
+                    "type": "not_found"
+                }
+            )
+
+        # Intentar eliminar el contacto
+        deleted = crud.delete_contact(db, contacto_id, user.id)
+        if not deleted:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "message": "Contacto no encontrado o no tienes permiso para eliminarlo",
+                    "type": "not_found"
+                }
+            )
+        return None
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": f"Error al eliminar el contacto: {str(e)}",
+                "type": "server_error"
+            }
+        )
 
 # ------------------ SIGNUP ------------------
 @router.post("/signup", response_model=schemas.Token)

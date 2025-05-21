@@ -7,12 +7,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
 import { ContactDetailsComponent } from '../contact-details/contact-details.component';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-
-interface FilterCriteria {
-  searchTerm: string;
-  parentesco: string;
-  categoria: string;
-}
+import { FilterCriteria } from '../../models/contacto.model';
 
 @Component({
   selector: 'app-contact-list',
@@ -64,12 +59,12 @@ export class ContactListComponent implements OnInit {
   loadContacts() {
     console.log('Iniciando carga de contactos...');
     this.service.getAll().subscribe({
-      next: (data: Contacto[]) => {
-        console.log('Contactos recibidos:', data);
-        this.contacts = data;
-        this.filteredContacts = data;
+      next: (contacts: Contacto[]) => {
+        console.log('Contactos recibidos:', contacts);
+        this.contacts = contacts;
+        this.filteredContacts = contacts;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error al cargar contactos:', error);
       }
     });
@@ -80,13 +75,12 @@ export class ContactListComponent implements OnInit {
     if (confirmation) {
       this.service.delete(id).subscribe({
         next: () => {
-          this.contacts = this.contacts.filter(c => c.id !== id);
-          this.filteredContacts = this.contacts;
+          this.loadContacts();
           // Mostrar mensaje de éxito
           this.showSuccessMessage('Contacto eliminado correctamente');
         },
-        error: (error) => {
-          console.error('Error al eliminar:', error);
+        error: (error: any) => {
+          console.error('Error al eliminar el contacto:', error);
           this.showErrorMessage('No se pudo eliminar el contacto');
         }
       });
@@ -124,13 +118,13 @@ export class ContactListComponent implements OnInit {
         contact.email?.toLowerCase().includes(criteria.searchTerm.toLowerCase()) ||
         contact.telefono.toLowerCase().includes(criteria.searchTerm.toLowerCase());
 
-      const matchesParentesco = !criteria.parentesco ||
-        contact.parentesco === criteria.parentesco;
+      const matchesTipoContacto = !criteria.tipoContacto ||
+        contact.tipo_contacto === criteria.tipoContacto;
 
-      const matchesCategoria = !criteria.categoria ||
-        contact.categoria === criteria.categoria;
+      const matchesDetalleTipo = !criteria.detalleTipo ||
+        contact.detalle_tipo === criteria.detalleTipo;
 
-      return matchesSearch && matchesParentesco && matchesCategoria;
+      return matchesSearch && matchesTipoContacto && matchesDetalleTipo;
     });
   }
 

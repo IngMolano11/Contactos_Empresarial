@@ -71,6 +71,19 @@
   font-size: 1rem;
 }
 
+.contact-image {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.contact-image img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: var(--border-radius-md);
+  object-fit: cover;
+  box-shadow: var(--shadow-md);
+}
+
 @keyframes slideIn {
   from {
     transform: translateY(-20px);

@@ -6,11 +6,11 @@
     <ul>
       <li [class.completed]="form.get('nombre')?.valid">Nombre del contacto</li>
       <li [class.completed]="form.get('telefono')?.valid">Número de teléfono</li>
-      <li class="optional">Email</li>
+      <li class="optional">Email (Opcional)</li>
       <li class="optional">Dirección (opcional)</li>
       <li class="optional">Lugar (opcional)</li>
-      <li class="optional">Parentesco (opcional)</li>
-      <li class="optional">Categoría (opcional)</li>
+      <li class="optional">Tipo de Contacto (opcional)</li>
+      <li class="optional">Detalle del Tipo (opcional)</li>
     </ul>
   </div>
 
@@ -18,7 +18,7 @@
     Cargando...
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="form-field">
       <label>Nombre:</label>
       <input formControlName="nombre" type="text" placeholder="Ingresa el nombre" />
@@ -54,46 +54,47 @@
     </div>
 
     <div class="form-field">
-      <label>Parentesco:</label>
-      <select formControlName="parentesco">
-        <option value="" disabled selected>Selecciona un parentesco</option>
-        <option *ngFor="let option of parentescoOptions" [value]="option">
+      <label>Tipo de Contacto:</label>
+      <select formControlName="tipo_contacto">
+        <option value="">Seleccione un tipo</option>
+        <option *ngFor="let option of tipoContactoOptions" [value]="option">
           {{ option }}
         </option>
       </select>
     </div>
 
-    <div class="form-field" *ngIf="form.get('parentesco')?.value === 'Otro'">
-      <label>Especifica el parentesco:</label>
+    <div class="form-field" *ngIf="form.get('tipo_contacto')?.value === 'Otro'">
+      <label>Especifique el tipo:</label>
+      <input formControlName="tipo_contacto_otro" type="text" placeholder="Especifique el tipo de contacto">
+    </div>
+
+    <div class="form-field" *ngIf="form.get('tipo_contacto')?.value">
+      <label>Detalle del tipo:</label>
+      <select formControlName="detalle_tipo">
+        <option value="">Seleccione un detalle</option>
+        <option *ngFor="let option of getDetalleTipoOptions(form.get('tipo_contacto')?.value)" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-field" *ngIf="form.get('detalle_tipo')?.value === 'Otro'">
+      <label>Especifique el detalle:</label>
+      <input formControlName="detalle_tipo_otro" type="text" placeholder="Especifique el detalle">
+    </div>
+
+    <div class="form-field image-upload">
+      <label>Foto del contacto:</label>
       <input
-        formControlName="parentescoOtro"
-        type="text"
-        placeholder="Ingresa el parentesco"
-      />
-      <div *ngIf="form.get('parentescoOtro')?.errors?.['required'] && form.get('parentescoOtro')?.touched" class="error">
-        Este campo es obligatorio cuando seleccionas "Otro".
+        type="file"
+        (change)="onFileSelected($event)"
+        accept="image/*"
+      >
+      <div class="image-preview" *ngIf="imagePreview">
+        <img [src]="imagePreview" alt="Vista previa">
       </div>
-    </div>
-
-    <div class="form-field">
-      <label>Categoría:</label>
-      <select formControlName="categoria">
-        <option value="" disabled selected>Selecciona una categoría</option>
-        <option *ngFor="let option of categoriaOptions" [value]="option">
-          {{ option }}
-        </option>
-      </select>
-    </div>
-
-    <div class="form-field" *ngIf="form.get('categoria')?.value === 'Otro'">
-      <label>Especifica la categoría:</label>
-      <input
-        formControlName="categoriaOtro"
-        type="text"
-        placeholder="Ingresa la categoría"
-      />
-      <div *ngIf="form.get('categoriaOtro')?.errors?.['required'] && form.get('categoriaOtro')?.touched" class="error">
-        Este campo es obligatorio cuando seleccionas "Otro".
+      <div *ngIf="imageError" class="error">
+        {{ imageError }}
       </div>
     </div>
 
@@ -103,7 +104,11 @@
     </div>
 
     <div *ngIf="errorMessage" class="error-message">
-      {{ errorMessage }}
+      <div class="error-icon">⚠️</div>
+      <div class="error-content">
+        <h4>Error al procesar la solicitud</h4>
+        <p [innerHTML]="errorMessage | nl2br"></p>
+      </div>
     </div>
     <div *ngIf="successMessage" class="success-message">
       {{ successMessage }}

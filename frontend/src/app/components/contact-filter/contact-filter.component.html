@@ -14,28 +14,18 @@
 
   <div class="filter-bottom-section">
     <div class="filter-select">
-      <label for="parentesco-select">Parentesco</label>
-      <select
-        id="parentesco-select"
-        [(ngModel)]="selectedParentesco"
-        (ngModelChange)="onFilterChange()"
-      >
-        <option value="">Todos los parentescos</option>
-        <option *ngFor="let option of parentescoOptions" [value]="option">
-          {{ option }}
-        </option>
+      <label for="tipo-contacto-select">Tipo de Contacto</label>
+      <select id="tipo-contacto-select" [(ngModel)]="selectedTipoContacto" (ngModelChange)="onFilterChange()">
+        <option value="">Todos los tipos</option>
+        <option *ngFor="let option of tipoContactoOptions" [value]="option">{{ option }}</option>
       </select>
     </div>
 
-    <div class="filter-select">
-      <label for="categoria-select">Categoría</label>
-      <select
-        id="categoria-select"
-        [(ngModel)]="selectedCategoria"
-        (ngModelChange)="onFilterChange()"
-      >
-        <option value="">Todas las categorías</option>
-        <option *ngFor="let option of categoriaOptions" [value]="option">
+    <div class="filter-select" *ngIf="selectedTipoContacto">
+      <label for="detalle-tipo-select">Detalle del Tipo</label>
+      <select id="detalle-tipo-select" [(ngModel)]="selectedDetalleTipo" (ngModelChange)="onFilterChange()">
+        <option value="">Todos los detalles</option>
+        <option *ngFor="let option of detalleTipoMapping[selectedTipoContacto]" [value]="option">
           {{ option }}
         </option>
       </select>

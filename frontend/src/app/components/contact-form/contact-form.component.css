@@ -156,27 +156,48 @@ button:hover:not(:disabled) {
   box-shadow: var(--shadow-md);
 }
 
-.error-message, .success-message {
+.error-message {
+  background-color: rgba(211, 47, 47, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: var(--border-radius-sm);
   padding: var(--spacing-md);
   margin-top: var(--spacing-md);
-  border-radius: var(--border-radius-sm);
-  text-align: center;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
   animation: slideIn 0.3s ease;
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.error-icon {
+  font-size: 1.5rem;
+  color: var(--color-error);
 }
 
-.error-message {
-  background-color: var(--color-error);
-  color: var(--color-text-light);
+.error-content {
+  flex: 1;
+}
+
+.error-content h4 {
+  margin: 0 0 var(--spacing-xs);
+  color: var(--color-error);
+  font-weight: 500;
+}
+
+.error-content p {
+  margin: 0;
+  color: var(--color-text);
+  white-space: pre-line;
 }
 
 .success-message {
-  background-color: var(--color-success);
-  color: var(--color-text-light);
+  background-color: rgba(46, 125, 50, 0.1);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  margin-top: var(--spacing-md);
+  text-align: center;
+  animation: slideIn 0.3s ease;
 }
 
 .loading {
@@ -210,6 +231,22 @@ form.loading select,
 form.loading button {
   opacity: 0.7;
   pointer-events: none;
+}
+
+.image-upload {
+  margin-bottom: var(--spacing-lg);
+}
+
+.image-preview {
+  margin-top: var(--spacing-sm);
+  text-align: center;
+}
+
+.image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: var(--border-radius-sm);
+  object-fit: cover;
 }
 
 @media (max-width: 768px) {

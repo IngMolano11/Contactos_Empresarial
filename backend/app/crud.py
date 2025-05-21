@@ -2,50 +2,75 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app import models_db, schemas
 from app.auth import get_password_hash, verify_password
+from pathlib import Path
 
-def get_contact(db: Session, contacto_id: int):
+def get_contact(db: Session, contacto_id: int, user_id: int):
     """
-    Obtiene un contacto por su ID.
+    Obtiene un contacto por su ID y verifica que pertenezca al usuario.
     """
-    return db.query(models_db.ContactModel).filter(models_db.ContactModel.id == contacto_id).first()
+    return db.query(models_db.Contact).filter(
+        models_db.Contact.id == contacto_id,
+        models_db.Contact.owner_id == user_id
+    ).first()
 
-def get_contacts(db: Session, skip: int = 0, limit: int = 100):
+def get_contacts(db: Session, user_id: int, skip: int = 0, limit: int = 100):
     """
-    Obtiene una lista de contactos con paginación.
+    Obtiene la lista de contactos de un usuario específico
     """
-    return db.query(models_db.ContactModel).offset(skip).limit(limit).all()
+    return db.query(models_db.ContactModel).filter(
+        models_db.ContactModel.owner_id == user_id
+    ).offset(skip).limit(limit).all()
 
 def create_contact(db: Session, contacto: schemas.ContactCreate, user_id: int):
     """
     Crea un nuevo contacto asociado a un usuario.
     """
-    db_contact = models_db.ContactModel(**contacto.dict(), owner_id=user_id)
-    db.add(db_contact)
-    db.commit()
-    db.refresh(db_contact)
-    return db_contact
+    try:
+        contact_dict = contacto.dict()
+        db_contact = models_db.Contact(**contact_dict, owner_id=user_id)
+        db.add(db_contact)
+        db.commit()
+        db.refresh(db_contact)
+        return db_contact
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"Error al crear el contacto en la base de datos: {str(e)}")
 
-def update_contact(db: Session, contacto_id: int, datos: schemas.ContactUpdate):
+def update_contact(db: Session, contacto_id: int, datos: schemas.ContactUpdate, user_id: int):
     """
-    Actualiza un contacto si existe.
+    Actualiza un contacto si existe y pertenece al usuario.
     """
-    contacto_db = get_contact(db, contacto_id)
+    contacto_db = get_contact(db, contacto_id, user_id)
     if not contacto_db:
         return None
     
     for key, value in datos.dict(exclude_unset=True).items():
         setattr(contacto_db, key, value)
-    db.commit()
-    db.refresh(contacto_db)
-    return contacto_db
+    
+    try:
+        db.commit()
+        db.refresh(contacto_db)
+        return contacto_db
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"Error al actualizar el contacto: {str(e)}")
 
-def delete_contact(db: Session, contacto_id: int):
+def delete_contact(db: Session, contacto_id: int, user_id: int):
     """
-    Elimina un contacto por ID si existe.
+    Elimina un contacto por ID si existe y pertenece al usuario.
     """
-    contacto_db = get_contact(db, contacto_id)
+    contacto_db = get_contact(db, contacto_id, user_id)
     if not contacto_db:
         return None
+    
+    # Si el contacto tiene una imagen, eliminarla
+    if contacto_db.imagen:
+        try:
+            imagen_path = Path("uploads") / Path(contacto_db.imagen).name
+            if imagen_path.exists():
+                imagen_path.unlink()
+        except Exception as e:
+            print(f"Error al eliminar imagen: {str(e)}")
     
     db.delete(contacto_db)
     db.commit()

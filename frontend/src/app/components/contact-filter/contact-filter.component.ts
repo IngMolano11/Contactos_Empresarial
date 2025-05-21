@@ -1,14 +1,12 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Parentesco, Categoria } from '../../models/contacto.model';
+import { TipoContacto, DetalleTipo } from '../../models/contacto.model';
 
 export interface FilterCriteria {
   searchTerm: string;
-  parentesco: Parentesco | '';
-  parentescoOtro?: string;
-  categoria: Categoria | '';
-  categoriaOtro?: string;
+  tipoContacto: TipoContacto | '';
+  detalleTipo: DetalleTipo | '';
 }
 
 @Component({
@@ -23,33 +21,43 @@ export interface FilterCriteria {
 })
 export class ContactFilterComponent {
   searchTerm: string = '';
-  selectedParentesco: Parentesco | '' = '';
-  selectedCategoria: Categoria | '' = '';
+  selectedTipoContacto: TipoContacto | '' = '';
+  selectedDetalleTipo: DetalleTipo | '' = '';
 
-  parentescoOptions: Parentesco[] = ['Familiar', 'Amoroso', 'Amistad', 'Laboral', 'Educativo', 'Otro'];
-  categoriaOptions: Categoria[] = ['Personal', 'Profesional', 'Educativo', 'Social', 'Salud', 'Financiero', 'Emergencia', 'Otro'];
+  tipoContactoOptions: TipoContacto[] = [
+    'Proveedor', 'Cliente', 'Empleado', 'Externo', 'Socio', 'Aliado', 'Otro'
+  ];
+
+  detalleTipoMapping: { [key in TipoContacto]: DetalleTipo[] } = {
+    'Proveedor': ['Mercancía', 'Servicios', 'Software', 'Insumos', 'Logística'],
+    'Cliente': ['Corporativo', 'Persona natural', 'Frecuente', 'Potencial'],
+    'Empleado': ['Administrativo', 'Operativo', 'Freelance', 'Temporal'],
+    'Externo': ['Consultor', 'Auditor', 'Contratista', 'Técnico'],
+    'Socio': ['Inversionista', 'Co-fundador', 'Representante legal'],
+    'Aliado': ['ONG', 'Entidad pública', 'Cámara de comercio', 'Universidad'],
+    'Otro': ['Otro']
+  };
 
   @Output() filterChange = new EventEmitter<FilterCriteria>();
 
-  // Añadir método para verificar si hay filtros activos
   isFiltering(): boolean {
     return this.searchTerm !== '' ||
-           this.selectedParentesco !== '' ||
-           this.selectedCategoria !== '';
+           this.selectedTipoContacto !== '' ||
+           this.selectedDetalleTipo !== '';
   }
 
   onFilterChange() {
     this.filterChange.emit({
       searchTerm: this.searchTerm,
-      parentesco: this.selectedParentesco,
-      categoria: this.selectedCategoria
+      tipoContacto: this.selectedTipoContacto,
+      detalleTipo: this.selectedDetalleTipo
     });
   }
 
   resetFilters() {
     this.searchTerm = '';
-    this.selectedParentesco = '';
-    this.selectedCategoria = '';
+    this.selectedTipoContacto = '';
+    this.selectedDetalleTipo = '';
     this.onFilterChange();
   }
 }

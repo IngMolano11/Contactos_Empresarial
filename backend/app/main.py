@@ -3,6 +3,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 from app.database import engine
 from app.models_db import Base
@@ -23,14 +25,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Asegurarse que el directorio de uploads existe
+uploads_dir = Path("uploads")
+uploads_dir.mkdir(exist_ok=True)
+
+# Montar el directorio de uploads para servir archivos estáticos
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # --- Handlers de errores de validación y HTTP ---
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for error in exc.errors():
+        errors.append({
+            'field': error['loc'][-1],
+            'message': error['msg']
+        })
     return JSONResponse(
         status_code=422,
         content={
-            "errors": exc.errors(),
-            "body": exc.body
+            "detail": "Error de validación",
+            "errors": errors
         },
     )
 
@@ -39,6 +54,20 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"message": exc.detail},
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg = str(exc)
+    if hasattr(exc, 'detail'):
+        error_msg = exc.detail
+    
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Error interno del servidor",
+            "message": error_msg
+        }
     )
 
 # --- Endpoint de salud (ping) ---
