@@ -3,6 +3,7 @@ import { ContactListComponent } from './components/contact-list/contact-list.com
 import { ContactFormComponent } from './components/contact-form/contact-form.component';
 import { LoginComponent } from './components/login/login.component';
 import { authGuard } from './guards/auth.guard';
+import { EmailComponent } from './components/email/email.component';  // Asegurarnos que existe este componente
 
 export const appRoutes: Routes = [
   {
@@ -27,6 +28,11 @@ export const appRoutes: Routes = [
   {
     path: 'contactos/editar/:id',
     component: ContactFormComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'email',
+    component: EmailComponent,
     canActivate: [authGuard]
   }
 ];

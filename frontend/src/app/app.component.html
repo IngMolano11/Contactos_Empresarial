@@ -27,9 +27,36 @@
     </div>
   </header>
 
-  <main class="main-content">
-    <router-outlet></router-outlet>
-  </main>
+  <div class="main-layout">
+    <!-- Sidebar y botón solo visible si está logueado -->
+    <ng-container *ngIf="isLoggedIn">
+      <!-- Botón toggle -->
+      <button class="toggle-sidebar-button" (click)="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+        {{ isSidebarOpen ? 'Cerrar Opciones' : 'Opciones' }}
+      </button>
+
+      <div class="sidebar" [class.sidebar-open]="isSidebarOpen">
+        <div class="sidebar-header">
+          <h3>Opciones</h3>
+        </div>
+        <div class="sidebar-content">
+          <button class="sidebar-option" routerLink="/contactos" (click)="toggleSidebar()">
+            <i class="fas fa-address-book"></i>
+            Lista de Contactos
+          </button>
+          <button class="sidebar-option" routerLink="/email" (click)="toggleSidebar()">
+            <i class="fas fa-envelope"></i>
+            Enviar correo
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <main class="main-content" [class.with-sidebar]="isSidebarOpen">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 
   <footer class="app-footer">
     <div class="footer-content">

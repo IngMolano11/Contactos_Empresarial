@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [
+    CommonModule, 
+    RouterOutlet,
+    RouterLink  // Añadir RouterLink para que funcione el routerLink del sidebar
+  ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -16,6 +20,7 @@ export class AppComponent implements OnInit {
   isLoggedIn = false;
   theme: 'light' | 'dark' = 'light';
   currentYear = new Date().getFullYear(); // Añadir esta línea
+  isSidebarOpen = false;
 
   constructor(private authService: AuthService, private router: Router) {
     const savedTheme = localStorage.getItem('theme');
@@ -42,5 +47,9 @@ export class AppComponent implements OnInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 }
