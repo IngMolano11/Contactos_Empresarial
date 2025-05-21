@@ -85,11 +85,15 @@
 
     <div class="form-field image-upload">
       <label>Foto del contacto:</label>
-      <input
-        type="file"
-        (change)="onFileSelected($event)"
-        accept="image/*"
-      >
+      <label class="image-upload-button">
+        <i class="fas fa-camera"></i>
+        {{ imagePreview ? 'Cambiar foto' : 'Subir foto' }}
+        <input
+          type="file"
+          (change)="onFileSelected($event)"
+          accept="image/*"
+        >
+      </label>
       <div class="image-preview" *ngIf="imagePreview">
         <img [src]="imagePreview" alt="Vista previa">
       </div>

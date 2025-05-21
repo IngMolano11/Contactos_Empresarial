@@ -103,4 +103,82 @@ export class ContactService {
         })
     );
   }
+
+  exportToCSV(contacts: Contacto[]): void {
+    if (contacts.length === 0) {
+      throw new Error('No hay contactos para exportar');
+    }
+
+    try {
+      // Definir las columnas y headers
+      const headers = [
+        'Nombre',
+        'Teléfono',
+        'Email',
+        'Dirección',
+        'Lugar',
+        'Tipo de Contacto',
+        'Detalle del Tipo',
+        'Tipo de Contacto (Otro)',
+        'Detalle del Tipo (Otro)'
+      ];
+
+      // Convertir los datos a formato CSV
+      const csvData = contacts.map(contact => ([
+        this.formatCSVField(contact.nombre),
+        this.formatCSVField(contact.telefono),
+        this.formatCSVField(contact.email),
+        this.formatCSVField(contact.direccion),
+        this.formatCSVField(contact.lugar),
+        this.formatCSVField(contact.tipo_contacto),
+        this.formatCSVField(contact.detalle_tipo),
+        this.formatCSVField(contact.tipo_contacto_otro),
+        this.formatCSVField(contact.detalle_tipo_otro)
+      ]));
+
+      // Crear el contenido del CSV con separador de punto y coma
+      let csvContent = headers.join(';') + '\n';
+      csvContent += csvData.map(row => row.join(';')).join('\n');
+
+      // Agregar BOM para que Excel reconozca el UTF-8
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { 
+        type: 'text/csv;charset=utf-8;' 
+      });
+
+      // Crear el enlace de descarga
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      // Configurar el nombre del archivo con fecha
+      const date = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+      const filename = `contactos_${date}.csv`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error('Error al generar CSV:', error);
+      throw new Error('Error al generar el archivo CSV');
+    }
+  }
+
+  private formatCSVField(value: any): string {
+    if (value === null || value === undefined) return '';
+    
+    // Convertir a string y escapar comillas dobles
+    const stringValue = value.toString();
+    
+    // Si el valor contiene punto y coma o saltos de línea, encerrarlo en comillas
+    if (stringValue.includes(';') || stringValue.includes('\n') || stringValue.includes('"')) {
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    
+    return stringValue;
+  }
 }

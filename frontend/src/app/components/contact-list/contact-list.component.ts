@@ -1,13 +1,12 @@
 // src/app/components/contact-list/contact-list.component.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Contacto } from '../../models/contacto.model';
-import { ContactService } from '../../services/contact.service';
 import { Router, RouterModule } from '@angular/router';
+import { trigger, state, style, transition, animate } from '@angular/animations';
+import { Contacto, FilterCriteria } from '../../models/contacto.model';
+import { ContactService } from '../../services/contact.service';
 import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
 import { ContactDetailsComponent } from '../contact-details/contact-details.component';
-import { trigger, state, style, transition, animate } from '@angular/animations';
-import { FilterCriteria } from '../../models/contacto.model';
 
 @Component({
   selector: 'app-contact-list',
@@ -43,9 +42,10 @@ import { FilterCriteria } from '../../models/contacto.model';
 export class ContactListComponent implements OnInit {
   contacts: Contacto[] = [];
   filteredContacts: Contacto[] = [];
-  showFilters: boolean = false; // Añadir esta propiedad
+  showFilters: boolean = false;
   selectedContact?: Contacto;
   showDetails = false;
+  successMessage: string | null = null;
 
   constructor(
     private service: ContactService,
@@ -76,8 +76,7 @@ export class ContactListComponent implements OnInit {
       this.service.delete(id).subscribe({
         next: () => {
           this.loadContacts();
-          // Mostrar mensaje de éxito
-          this.showSuccessMessage('Contacto eliminado correctamente');
+          this.showSuccessNotification('Contacto eliminado correctamente');
         },
         error: (error: any) => {
           console.error('Error al eliminar el contacto:', error);
@@ -85,14 +84,6 @@ export class ContactListComponent implements OnInit {
         }
       });
     }
-  }
-
-  showSuccessMessage(message: string) {
-    // Implementar un sistema de notificaciones toast
-  }
-
-  showErrorMessage(message: string) {
-    // Implementar un sistema de notificaciones toast
   }
 
   onEdit(id: number) {
@@ -143,5 +134,31 @@ export class ContactListComponent implements OnInit {
   closeDetails() {
     this.showDetails = false;
     this.selectedContact = undefined;
+  }
+
+  downloadCSV(): void {
+    if (this.filteredContacts.length === 0) {
+      this.showErrorMessage('No hay contactos para exportar');
+      return;
+    }
+
+    try {
+      this.service.exportToCSV(this.filteredContacts);
+      this.showSuccessNotification('¡Descarga completada!');
+    } catch (error) {
+      console.error('Error al exportar contactos:', error);
+      this.showErrorMessage('Error al descargar el archivo CSV');
+    }
+  }
+
+  private showSuccessNotification(message: string): void {
+    this.successMessage = message;
+    setTimeout(() => {
+      this.successMessage = null;
+    }, 3000);
+  }
+
+  private showErrorMessage(message: string): void {
+    alert(message);
   }
 }

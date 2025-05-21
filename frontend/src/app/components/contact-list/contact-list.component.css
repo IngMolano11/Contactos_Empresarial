@@ -228,6 +228,91 @@
   to { opacity: 1; }
 }
 
+.download-button {
+  height: 42px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-purple-basil);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.download-button:hover {
+  background-color: var(--color-purple-basil-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.download-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: var(--color-text-disabled);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Notificación de éxito */
+.success-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--color-success);
+  color: var(--color-text-light);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  box-shadow: var(--shadow-md);
+  animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+  z-index: 1000;
+}
+
+.success-notification i {
+  font-size: 1.2rem;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Asegurar que la notificación sea responsiva */
+@media (max-width: 768px) {
+  .success-notification {
+    top: auto;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    justify-content: center;
+  }
+}
+
+/* Actualizar media queries existentes */
 @media (max-width: 768px) {
   .contacts-container {
     padding: 1rem;
@@ -265,6 +350,18 @@
   .delete-button {
     flex: 1;
     max-width: 120px; /* Limitar el ancho en móviles */
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .download-button,
+  .search-toggle-button,
+  .add-button {
+    width: 100%;
+    justify-content: center;
   }
 }
 

@@ -6,45 +6,55 @@
     </div>
 
     <div class="details-content" *ngIf="contact">
+      <!-- Imagen del contacto -->
       <div class="contact-image" *ngIf="contact?.imagen">
         <img [src]="getImageUrl(contact.imagen)" 
              alt="Foto de contacto"
              (error)="onImageError($event)">
       </div>
 
-      <div class="detail-item">
-        <label>Nombre:</label>
-        <p>{{contact.nombre}}</p>
+      <!-- Información principal -->
+      <div class="details-section">
+        <div class="detail-item">
+          <label>Nombre:</label>
+          <p>{{contact.nombre}}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Teléfono:</label>
+          <p>{{contact.telefono}}</p>
+        </div>
+
+        <div class="detail-item" *ngIf="contact.email">
+          <label>Email:</label>
+          <p>{{contact.email}}</p>
+        </div>
       </div>
 
-      <div class="detail-item">
-        <label>Teléfono:</label>
-        <p>{{contact.telefono}}</p>
+      <!-- Información adicional -->
+      <div class="details-section">
+        <div class="detail-item" *ngIf="contact.direccion">
+          <label>Dirección:</label>
+          <p>{{contact.direccion}}</p>
+        </div>
+
+        <div class="detail-item" *ngIf="contact.lugar">
+          <label>Lugar:</label>
+          <p>{{contact.lugar}}</p>
+        </div>
       </div>
 
-      <div class="detail-item" *ngIf="contact.email">
-        <label>Email:</label>
-        <p>{{contact.email}}</p>
-      </div>
+      <!-- Información de categorización -->
+      <div class="details-section">
+        <div class="detail-item" *ngIf="contact.tipo_contacto">
+          <label>Tipo de Contacto:</label>
+          <p>{{contact.tipo_contacto === 'Otro' ? contact.tipo_contacto_otro : contact.tipo_contacto}}</p>
+        </div>
 
-      <div class="detail-item" *ngIf="contact.direccion">
-        <label>Dirección:</label>
-        <p>{{contact.direccion}}</p>
-      </div>
-
-      <div class="detail-item" *ngIf="contact.lugar">
-        <label>Lugar:</label>
-        <p>{{contact.lugar}}</p>
-      </div>
-
-      <div class="detail-item" *ngIf="contact.tipo_contacto">
-        <label>Tipo de Contacto:</label>
-        <p>{{contact.tipo_contacto === 'Otro' ? contact.tipo_contacto_otro : contact.tipo_contacto}}</p>
-      </div>
-
-      <div class="detail-item" *ngIf="contact.detalle_tipo">
-        <label>Detalle del Tipo:</label>
-        <p>{{contact.detalle_tipo === 'Otro' ? contact.detalle_tipo_otro : contact.detalle_tipo}}</p>
+        <div class="detail-item" *ngIf="contact.detalle_tipo">
+          <label>Detalle del Tipo:</label>
+          <p>{{contact.detalle_tipo === 'Otro' ? contact.detalle_tipo_otro : contact.detalle_tipo}}</p>
+        </div>
       </div>
     </div>
   </div>
