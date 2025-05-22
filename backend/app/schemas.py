@@ -61,6 +61,7 @@ class ContactUpdate(ContactBase):
 class ContactInDB(ContactBase):
     id: int
     owner_id: int
+    average_rating: Optional[float] = None
 
     model_config = ConfigDict(from_attributes=True)
 

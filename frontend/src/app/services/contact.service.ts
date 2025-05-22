@@ -12,11 +12,12 @@ type ErrorType = 'defaultError' | 'validation' | 'notFound' | 'unauthorized' | '
 })
 export class ContactService {
   private API = environment.apiUrl;
-
-  private errorMessages: Record<ErrorType, string> = {
+  
+  // Definir los mensajes de error como propiedad de la clase
+  private errorMessages = {
     defaultError: 'Ha ocurrido un error inesperado',
     validation: 'Error de validación',
-    notFound: 'Recurso no encontrado',
+    notFound: 'El recurso solicitado no existe',
     unauthorized: 'No autorizado',
     serverError: 'Error del servidor'
   };
@@ -97,7 +98,13 @@ export class ContactService {
 
   getAll(): Observable<Contacto[]> {
     return this.http.get<{data: Contacto[]}>(this.API).pipe(
-      map(response => response.data), // Extraer el array de contactos del objeto response
+      map(response => {
+        console.log('Respuesta del servidor:', response); // Debug
+        return response.data.map(contact => ({
+          ...contact,
+          averageRating: contact.average_rating
+        }));
+      }),
       catchError(this.handleError)
     );
   }

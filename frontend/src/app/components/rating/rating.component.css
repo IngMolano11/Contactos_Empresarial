@@ -29,8 +29,8 @@
 
 .star-btn.half i {
   position: relative;
-  background: linear-gradient(90deg,
-    var(--color-purple-basil) 50%,
+  background: linear-gradient(90deg, 
+    var(--color-purple-basil) 50%, 
     var(--color-text-disabled) 50%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

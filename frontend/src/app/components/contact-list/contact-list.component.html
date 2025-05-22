@@ -28,10 +28,9 @@
       <div class="contact-header">
         <div class="header-content">
           <h3>{{ c.nombre }}</h3>
-          <!-- Añadimos el componente de calificación en modo readonly -->
           <div class="rating-display">
             <app-rating
-              [value]="c.averageRating || 0"
+              [value]="c.averageRating !== undefined && c.averageRating !== null ? c.averageRating : 0"
               [readonly]="true"
               [showValue]="true"
               [size]="'small'">

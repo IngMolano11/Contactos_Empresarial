@@ -45,7 +45,7 @@ export class ContactListComponent implements OnInit {
   loadContacts() {
     this.service.getAll().subscribe({
       next: (contacts: Contacto[]) => {
-        console.log('Contactos recibidos:', contacts);
+        console.log('Contactos recibidos con ratings:', contacts);
         this.contacts = contacts;
         this.filteredContacts = contacts;
       },
@@ -147,7 +147,7 @@ export class ContactListComponent implements OnInit {
       this.service.addRating(this.selectedContact.id!, ratings).subscribe({
         next: () => {
           this.isRatingModalOpen = false;
-          this.loadContacts(); // Recargar todos los contactos para obtener los promedios actualizados
+          this.loadContacts(); // Recargar todos los contactos
           this.showSuccessNotification('Calificación guardada correctamente');
         },
         error: (error: Error) => {

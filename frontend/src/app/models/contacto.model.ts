@@ -11,19 +11,19 @@ export type DetalleTipo = 'Mercancía' | 'Servicios' | 'Software' | 'Insumos' | 
                          'ONG' | 'Entidad pública' | 'Cámara de comercio' | 'Universidad' | 'Otro';
 
 export interface Contacto {
-  id?: number;
-  nombre: string;
-  telefono: string;
-  email?: string;
-  direccion?: string;
-  lugar?: string;
-  tipo_contacto?: string;
-  tipo_contacto_otro?: string;
-  detalle_tipo?: string;
-  detalle_tipo_otro?: string;
-  imagen?: string;
-  ratings?: Rating[];
-  averageRating?: number;
+    id?: number;
+    nombre: string;
+    telefono: string;
+    email?: string;
+    direccion?: string;
+    lugar?: string;
+    tipo_contacto?: string;
+    tipo_contacto_otro?: string;
+    detalle_tipo?: string;
+    detalle_tipo_otro?: string;
+    imagen?: string;
+    averageRating?: number;
+    average_rating?: number; // Añadir ambas versiones para compatibilidad
 }
 
 export interface Rating {

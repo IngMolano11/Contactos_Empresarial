@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from app import models_db, schemas
 from app.auth import get_password_hash, verify_password
 from pathlib import Path
+from sqlalchemy import func
 
 def get_contact(db: Session, contacto_id: int, user_id: int):
     """
@@ -110,14 +111,18 @@ def create_rating(db: Session, rating: schemas.RatingCreate, contact_id: int):
 def update_contact_rating(db: Session, contact_id: int, new_rating: float):
     contact = db.query(models_db.Contact).filter(models_db.Contact.id == contact_id).first()
     if contact:
-        if contact.average_rating is not None:
-            ratings_count = db.query(models_db.Rating).filter(
+        # Calcular el nuevo promedio
+        ratings_count = db.query(models_db.Rating).filter(
+            models_db.Rating.contact_id == contact_id
+        ).count()
+        
+        if ratings_count > 0:
+            total_rating = db.query(func.sum(models_db.Rating.calificacion)).filter(
                 models_db.Rating.contact_id == contact_id
-            ).count()
-            contact.average_rating = (
-                (contact.average_rating * ratings_count + new_rating) / 
-                (ratings_count + 1)
-            )
+            ).scalar() or 0
+            contact.average_rating = total_rating / ratings_count
         else:
             contact.average_rating = new_rating
+            
         db.commit()
+        return contact
