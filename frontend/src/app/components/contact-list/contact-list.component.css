@@ -64,34 +64,31 @@
 }
 
 .contact-card {
-  background-color: var(--color-surface);
+  background: var(--color-surface);
   border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
   transition: all var(--transition-normal);
   border: 1px solid var(--color-input-border);
-  width: 100%;
+  box-shadow: var(--shadow-md);
 }
 
 .contact-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
+/* Header de la tarjeta */
 .contact-header {
+  background: #e4dfdc;
   padding: var(--spacing-md);
-  background: var(--color-surface-variant);
   border-bottom: 1px solid var(--color-input-border);
 }
 
+/* Contenido del header */
 .header-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
+  align-items: center; /* Asegura alineación vertical */
   width: 100%;
 }
 
@@ -101,23 +98,61 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Cuerpo de la tarjeta */
+.contact-body {
+  padding: var(--spacing-lg);
+  background: var(--color-surface);
+}
+
+/* Footer con los botones */
+.contact-actions {
+  background: #e4dfdc; /* Mismo color que el header */
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-input-border);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+/* Rating en el header */
+.rating-display {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-left: auto;
+  min-width: fit-content;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
 }
 
 .rating-display {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.rating-display app-rating {
-  display: inline-flex;
+  padding-left: var(--spacing-sm);
+  margin-left: auto;
+  min-width: fit-content;
+  background: transparent;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
 }
 
 .contact-body {
-  padding: var(--spacing-md);
-  flex-grow: 1;
+  padding: var(--spacing-lg);
   background: var(--color-surface);
+}
+
+/* Footer de la tarjeta también un tono más oscuro */
+.contact-actions {
+  background: #3d2331; /* Mismo tono que el header */
+  padding: var(--spacing-md);
+  border-top: 2px solid var(--color-purple-basil);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
 }
 
 .contact-body p {
@@ -163,25 +198,25 @@
 
 /* Contenedor principal de acciones */
 .contact-actions {
+  background: #3d2331; /* Mismo tono que el header */
   padding: var(--spacing-md);
+  border-top: 2px solid var(--color-purple-basil);
   display: flex;
+  justify-content: space-between;
   gap: var(--spacing-md);
-  background: var(--color-surface-variant);
-  border-top: 1px solid var(--color-input-border);
-  width: 100%;
 }
 
 /* Grupos de botones */
 .actions-left {
   display: flex;
   gap: var(--spacing-sm);
-  width: 25%; /* Asignar 25% del espacio total */
+  width: 25%;
 }
 
 .actions-right {
   display: flex;
   gap: var(--spacing-sm);
-  width: 75%; /* Asignar 75% del espacio total */
+  width: 75%;
   justify-content: flex-end;
 }
 
@@ -202,33 +237,51 @@
   gap: var(--spacing-xs);
   white-space: nowrap;
   flex: 1;
-  min-width: 0; /* Permite que el botón se encoja */
-  max-width: none; /* Elimina el límite de ancho máximo */
+  min-width: 0;
+  transition: all var(--transition-normal);
 }
 
 /* Estilos específicos para cada botón */
-.open-button {
-  background-color: var(--color-purple-basil);
-  color: var(--color-text-light);
-  border: none;
-}
-
-.edit-button {
-  background-color: var(--color-purple-basil);
-  color: var(--color-text-light);
-  border: none;
-}
-
+.open-button,
+.edit-button,
 .rate-button {
-  background-color: var(--color-surface);
-  color: var(--color-purple-basil);
-  border: 1px solid var(--color-purple-basil);
+  background-color: var(--color-purple-basil);
+  color: var(--color-text-light);
+  border: none;
+  padding: var(--spacing-sm);
+  height: 36px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  white-space: nowrap;
+  transition: all var(--transition-normal);
 }
 
 .delete-button {
-  background-color: var(--color-surface);
+  background-color: transparent;
   color: var(--color-error);
   border: 1px solid var(--color-error);
+}
+
+/* Efectos hover para los botones */
+.open-button:hover,
+.edit-button:hover,
+.rate-button:hover {
+  background-color: var(--color-purple-basil-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.delete-button:hover {
+  background-color: var(--color-error);
+  color: var(--color-text-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Media queries para responsividad */
@@ -450,9 +503,9 @@
 
 /* Estilos para el botón de calificar */
 .rate-button {
-  background-color: var(--color-surface);
+  background-color: var(--color-text-light);
   color: var(--color-purple-basil);
-  border: 1px solid var(--color-purple-basil);
+  border: none;
   height: 36px;
   padding: var(--spacing-sm);
   border-radius: var(--border-radius-sm);
@@ -484,4 +537,32 @@
 
 .rating-display app-rating {
   display: inline-flex;
+}
+
+/* Mejoras en botones */
+.action-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.action-button:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Ajustar el tema oscuro */
+[data-theme="dark"] .contact-header,
+[data-theme="dark"] .contact-actions {
+  background: #332f2c; /* Versión oscura del gris */
 }

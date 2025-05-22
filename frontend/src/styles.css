@@ -118,7 +118,23 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
-/* Animaciones */
+/* Mejoras de interacción */
+.btn, .card, .input-field {
+  transition: all var(--transition-normal);
+}
+
+.btn:hover, .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Mejoras de accesibilidad */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Animaciones globales */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -141,15 +157,15 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Utilidades */
-.text-error {
-  color: var(--color-error);
-}
+/* Mejoras responsive */
+@media (max-width: 768px) {
+  :root {
+    --spacing-md: calc(var(--spacing-unit) * 1.5);
+    --spacing-lg: calc(var(--spacing-unit) * 2);
+  }
 
-.text-success {
-  color: var(--color-success);
-}
-
-.text-warning {
-  color: var(--color-warning);
+  .grid-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
 }
