@@ -107,7 +107,7 @@ export class ContactFormComponent implements OnInit {
   }
 
   loadContact(id: number) {
-    this.service.getById(id).subscribe({
+    this.service.getContact(id).subscribe({
       next: (contacto: Contacto) => {
         this.form.patchValue(contacto);
         this.loading = false;

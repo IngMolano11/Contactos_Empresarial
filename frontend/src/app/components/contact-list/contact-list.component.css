@@ -72,6 +72,7 @@
   overflow: hidden;
   transition: all var(--transition-normal);
   border: 1px solid var(--color-input-border);
+  width: 100%;
 }
 
 .contact-card:hover {
@@ -85,12 +86,32 @@
   border-bottom: 1px solid var(--color-input-border);
 }
 
-.contact-header h3 {
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  width: 100%;
+}
+
+.header-content h3 {
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  font-size: 1.2rem;
-  color: var(--color-text);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rating-display {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.rating-display app-rating {
+  display: inline-flex;
 }
 
 .contact-body {
@@ -127,48 +148,62 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234E2D3E'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E");
 }
 
+/* Ajustar el tamaño base de la tarjeta */
+.contact-card {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  border: 1px solid var(--color-input-border);
+  width: 100%;
+}
+
+/* Contenedor principal de acciones */
 .contact-actions {
   padding: var(--spacing-md);
   display: flex;
-  gap: var(--spacing-md); /* Aumentar el espacio entre grupos de botones */
-  justify-content: space-between;
+  gap: var(--spacing-md);
   background: var(--color-surface-variant);
   border-top: 1px solid var(--color-input-border);
+  width: 100%;
 }
 
+/* Grupos de botones */
 .actions-left {
   display: flex;
   gap: var(--spacing-sm);
-  flex: 1; /* Distribuye el espacio disponible */
-  justify-content: flex-start;
-  max-width: 33%; /* Limita el ancho del botón Ver detalles */
+  width: 25%; /* Asignar 25% del espacio total */
 }
 
 .actions-right {
   display: flex;
   gap: var(--spacing-sm);
-  flex: 2; /* Da más espacio a los botones de la derecha */
+  width: 75%; /* Asignar 75% del espacio total */
   justify-content: flex-end;
 }
 
-/* Estilos base comunes para todos los botones */
+/* Estilos base para todos los botones */
 .open-button,
 .edit-button,
+.rate-button,
 .delete-button {
-  flex: 1; /* Hace que los botones ocupen el espacio disponible equitativamente */
-  min-width: 0; /* Elimina el min-width para permitir flexibilidad */
-  height: 36px;
   padding: var(--spacing-sm);
+  height: 36px;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem; /* Ligeramente más pequeño */
-  transition: all var(--transition-normal);
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  white-space: nowrap; /* Evita que el texto se rompa en múltiples líneas */
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0; /* Permite que el botón se encoja */
+  max-width: none; /* Elimina el límite de ancho máximo */
 }
 
 /* Estilos específicos para cada botón */
@@ -184,35 +219,38 @@
   border: none;
 }
 
+.rate-button {
+  background-color: var(--color-surface);
+  color: var(--color-purple-basil);
+  border: 1px solid var(--color-purple-basil);
+}
+
 .delete-button {
   background-color: var(--color-surface);
   color: var(--color-error);
   border: 1px solid var(--color-error);
 }
 
-/* Efectos hover */
-.open-button:hover {
-  background-color: var(--color-purple-basil-light);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+  .contact-actions {
+    flex-direction: column;
+    padding: var(--spacing-sm);
+  }
 
-.edit-button:hover {
-  background-color: var(--color-purple-basil-light);
-  transform: translateY(-2px);
-}
+  .actions-left,
+  .actions-right {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
 
-.delete-button:hover {
-  background-color: var(--color-error);
-  color: var(--color-text-light);
-  transform: translateY(-2px);
-}
-
-/* Contenedores de botones */
-.actions-left,
-.actions-right {
-  display: flex;
-  gap: var(--spacing-sm);
+  .open-button,
+  .edit-button,
+  .delete-button {
+    flex: 1;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
 }
 
 .no-contacts {
@@ -442,4 +480,8 @@
   align-items: center;
   gap: var(--spacing-xs);
   margin-left: auto;
+}
+
+.rating-display app-rating {
+  display: inline-flex;
 }

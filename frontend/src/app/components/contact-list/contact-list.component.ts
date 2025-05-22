@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
-import { ContactDetailsComponent } from '../contact-details/contact-details.component';
-import { RatingComponent } from '../rating/rating.component';
-import { RatingModalComponent } from '../rating-modal/rating-modal.component';
 import { ContactService } from '../../services/contact.service';
-import { Contacto, FilterCriteria } from '../../models/contacto.model'; // Añadir FilterCriteria
+import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
+import { RatingComponent } from '../rating/rating.component';
+import { ContactDetailsComponent } from '../contact-details/contact-details.component';
+import { RatingModalComponent } from '../rating-modal/rating-modal.component';
+import { Contacto } from '../../models/contacto.model';
+import { FilterCriteria } from '../contact-filter/contact-filter.component';
 
 @Component({
   selector: 'app-contact-list',
@@ -15,8 +16,8 @@ import { Contacto, FilterCriteria } from '../../models/contacto.model'; // Añad
     CommonModule,
     RouterModule,
     ContactFilterComponent,
-    ContactDetailsComponent,
     RatingComponent,
+    ContactDetailsComponent,
     RatingModalComponent
   ],
   templateUrl: './contact-list.component.html',
@@ -25,12 +26,12 @@ import { Contacto, FilterCriteria } from '../../models/contacto.model'; // Añad
 export class ContactListComponent implements OnInit {
   contacts: Contacto[] = [];
   filteredContacts: Contacto[] = [];
-  showFilters = false;
   selectedContact?: Contacto;
   showDetails = false;
+  isRatingModalOpen = false;
+  showFilters = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
-  isRatingModalOpen = false;
 
   constructor(
     private service: ContactService,
@@ -42,15 +43,15 @@ export class ContactListComponent implements OnInit {
   }
 
   loadContacts() {
-    console.log('Iniciando carga de contactos...');
     this.service.getAll().subscribe({
       next: (contacts: Contacto[]) => {
         console.log('Contactos recibidos:', contacts);
         this.contacts = contacts;
         this.filteredContacts = contacts;
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error al cargar contactos:', error);
+        this.showErrorNotification('Error al cargar los contactos');
       }
     });
   }
@@ -146,7 +147,7 @@ export class ContactListComponent implements OnInit {
       this.service.addRating(this.selectedContact.id!, ratings).subscribe({
         next: () => {
           this.isRatingModalOpen = false;
-          this.loadContacts();
+          this.loadContacts(); // Recargar todos los contactos para obtener los promedios actualizados
           this.showSuccessNotification('Calificación guardada correctamente');
         },
         error: (error: Error) => {

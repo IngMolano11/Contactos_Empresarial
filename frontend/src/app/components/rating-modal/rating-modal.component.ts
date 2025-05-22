@@ -59,6 +59,11 @@ export class RatingModalComponent implements OnInit {
     this.close.emit();
   }
 
+  onRating(categoria: string, value: number) {
+    this.ratingForm.get(categoria)?.setValue(value);
+    this.ratingForm.get(categoria)?.markAsTouched();
+  }
+
   private getCategoriasByTipoContacto(tipo: string): string[] {
     const categoriasMap: { [key: string]: string[] } = {
       'Proveedor': [

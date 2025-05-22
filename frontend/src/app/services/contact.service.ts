@@ -96,16 +96,17 @@ export class ContactService {
   }
 
   getAll(): Observable<Contacto[]> {
-    return this.http.get<{data: Contacto[]}>(this.API)
-      .pipe(
-        map(response => response.data),
-        catchError(this.handleError)
-      );
+    return this.http.get<{data: Contacto[]}>(this.API).pipe(
+      map(response => response.data), // Extraer el array de contactos del objeto response
+      catchError(this.handleError)
+    );
   }
 
-  getById(id: number): Observable<Contacto> {
-    return this.http.get<Contacto>(`${this.API}/${id}`)
-      .pipe(catchError(this.handleError));
+  // Eliminar el método getById y reemplazarlo por getContact
+  getContact(id: number): Observable<Contacto> {
+    return this.http.get<Contacto>(`${this.API}/${id}`).pipe(
+      catchError(this.handleError)
+    );
   }
 
   delete(id: number): Observable<void> {

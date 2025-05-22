@@ -6,44 +6,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   selector: 'app-rating',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="rating" [class.readonly]="readonly" [class.small]="size === 'small'">
-      <div class="stars">
-        <i *ngFor="let star of [1,2,3,4,5]"
-           class="fas"
-           [class.fa-star]="star <= value"
-           [class.fa-star-o]="star > value"
-           [style.cursor]="readonly ? 'default' : 'pointer'"
-           (click)="!readonly && onRate(star)"
-           (mouseenter)="!readonly && onHover(star)"
-           (mouseleave)="!readonly && onHover(value)">
-        </i>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .rating {
-      display: inline-block;
-    }
-    .stars {
-      color: var(--color-purple-basil);
-      display: flex;
-      gap: 2px;
-    }
-    .stars i {
-      transition: all var(--transition-normal);
-      font-size: 1.2rem;
-    }
-    .rating:not(.readonly) .stars i:hover {
-      transform: scale(1.2);
-    }
-    .rating.small .stars i {
-      font-size: 0.9rem;
-    }
-    .readonly .stars i {
-      cursor: default;
-    }
-  `],
+  templateUrl: './rating.component.html',
+  styleUrls: ['./rating.component.css'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -55,21 +19,26 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class RatingComponent implements ControlValueAccessor {
   @Input() readonly = false;
   @Input() size: 'normal' | 'small' = 'normal';
-  @Input() set rating(val: number) {
-    this.value = val;
-    this.onChange(this.value);
+  @Input() showValue = false;
+  @Input() set value(val: number) {
+    if (val !== undefined) {
+      this._value = val;
+      this.onChange(this._value);
+    }
   }
-  get rating(): number {
-    return this.value;
+  get value(): number {
+    return this._value;
   }
 
-  value = 0;
+  private _value = 0;
+  hoverValue = 0;
   disabled = false;
-  onChange = (value: number) => {};
-  onTouched = () => {};
+
+  private onChange = (_: any) => {};
+  private onTouched = () => {};
 
   writeValue(value: number): void {
-    this.value = value || 0;
+    this._value = value || 0;
   }
 
   registerOnChange(fn: any): void {
@@ -87,14 +56,17 @@ export class RatingComponent implements ControlValueAccessor {
   onRate(value: number): void {
     if (!this.disabled && !this.readonly) {
       this.value = value;
-      this.onChange(this.value);
       this.onTouched();
     }
   }
 
   onHover(value: number): void {
     if (!this.disabled && !this.readonly) {
-      this.value = value;
+      this.hoverValue = value;
     }
+  }
+
+  isHalfStar(star: number): boolean {
+    return Math.ceil(this._value) === star && this._value % 1 !== 0;
   }
 }

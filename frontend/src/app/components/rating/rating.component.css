@@ -1,25 +1,69 @@
 .rating {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .stars {
-  color: var(--color-purple-basil);
   display: flex;
-  gap: 2px;
+  gap: var(--spacing-xs);
 }
 
-.stars i {
+.star-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   transition: all var(--transition-normal);
 }
 
-.rating:not(.readonly) .stars i:hover {
-  transform: scale(1.2);
+.star-btn i {
+  font-size: 24px;
+  transition: all var(--transition-normal);
+  color: var(--color-text-disabled);
 }
 
-.rating.small .stars i {
-  font-size: 0.9rem;
+.star-btn.filled i {
+  color: var(--color-purple-basil);
 }
 
-.readonly .stars i {
+.star-btn.half i {
+  position: relative;
+  background: linear-gradient(90deg,
+    var(--color-purple-basil) 50%,
+    var(--color-text-disabled) 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Cuando es readonly */
+.rating.readonly .star-btn {
   cursor: default;
+  pointer-events: none;
+}
+
+/* Tamaño pequeño para las tarjetas */
+.rating.small .star-btn i {
+  font-size: 16px;
+}
+
+/* Valor numérico */
+.rating-value {
+  font-size: 0.9rem;
+  color: var(--color-purple-basil);
+  font-weight: 500;
+  background: var(--color-surface-variant);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+}
+
+/* Deshabilitar hover en readonly */
+.rating.readonly .star-btn:hover i {
+  transform: none;
+}
+
+/* Efectos hover solo cuando no es readonly */
+.rating:not(.readonly) .star-btn:not(:disabled):hover i {
+  transform: scale(1.2);
+  color: var(--color-purple-basil-light);
 }

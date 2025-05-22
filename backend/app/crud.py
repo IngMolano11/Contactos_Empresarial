@@ -111,7 +111,6 @@ def update_contact_rating(db: Session, contact_id: int, new_rating: float):
     contact = db.query(models_db.Contact).filter(models_db.Contact.id == contact_id).first()
     if contact:
         if contact.average_rating is not None:
-            # Calcular nuevo promedio considerando calificaciones anteriores
             ratings_count = db.query(models_db.Rating).filter(
                 models_db.Rating.contact_id == contact_id
             ).count()
@@ -121,7 +120,4 @@ def update_contact_rating(db: Session, contact_id: int, new_rating: float):
             )
         else:
             contact.average_rating = new_rating
-        
         db.commit()
-        db.refresh(contact)
-    return contact

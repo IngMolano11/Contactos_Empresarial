@@ -14,10 +14,10 @@
               {{ratingForm.get(categoria)?.value}}/5
             </div>
           </div>
-          <app-rating 
+          <app-rating
             [formControlName]="categoria"
             [readonly]="false"
-            [size]="'normal'">
+            [showValue]="true">
           </app-rating>
           <div class="rating-error" *ngIf="ratingForm.get(categoria)?.errors?.['required'] && ratingForm.get(categoria)?.touched">
             Por favor califica este criterio
@@ -26,7 +26,7 @@
 
         <div class="form-field">
           <label>Comentario justificativo: <span class="required">*</span></label>
-          <textarea 
+          <textarea
             formControlName="comentario"
             maxlength="150"
             placeholder="Añade un comentario justificativo...">
@@ -42,7 +42,7 @@
 
       <div class="form-actions">
         <button type="button" class="cancel-button" (click)="onClose()">Cancelar</button>
-        <button type="submit" 
+        <button type="submit"
                 [disabled]="ratingForm.invalid || loading"
                 class="submit-button">
           <i class="fas fa-save"></i>
