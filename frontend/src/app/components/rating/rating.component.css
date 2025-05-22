@@ -1,0 +1,25 @@
+.rating {
+  display: inline-block;
+}
+
+.stars {
+  color: var(--color-purple-basil);
+  display: flex;
+  gap: 2px;
+}
+
+.stars i {
+  transition: all var(--transition-normal);
+}
+
+.rating:not(.readonly) .stars i:hover {
+  transform: scale(1.2);
+}
+
+.rating.small .stars i {
+  font-size: 0.9rem;
+}
+
+.readonly .stars i {
+  cursor: default;
+}

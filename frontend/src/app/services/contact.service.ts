@@ -2,35 +2,37 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Contacto } from '../models/contacto.model';
+import { Contacto, Rating } from '../models/contacto.model';
 import { environment } from '../../environments/environment';
+
+type ErrorType = 'defaultError' | 'validation' | 'notFound' | 'unauthorized' | 'serverError';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContactService {
   private API = environment.apiUrl;
-  private errorMessages: { [key: string]: string } = {
-    validation_error: 'Por favor, verifica los datos ingresados',
-    not_found: 'No se encontró el recurso solicitado',
-    upload_error: 'Error al subir la imagen',
-    server_error: 'Error interno del servidor',
-    unauthorized: 'No tienes permiso para realizar esta acción',
-    defaultError: 'Ha ocurrido un error' // Cambiamos 'default' por 'defaultError'
+
+  private errorMessages: Record<ErrorType, string> = {
+    defaultError: 'Ha ocurrido un error inesperado',
+    validation: 'Error de validación',
+    notFound: 'Recurso no encontrado',
+    unauthorized: 'No autorizado',
+    serverError: 'Error del servidor'
   };
 
   constructor(private http: HttpClient) {}
 
   private handleError = (error: HttpErrorResponse) => {
     let errorMessage = 'Ha ocurrido un error';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Error del lado del cliente
       errorMessage = error.error.message;
     } else {
       // Error del servidor
       const errorData = error.error;
-      
+
       if (errorData?.errors) {
         // Múltiples errores de validación
         errorMessage = errorData.errors
@@ -44,12 +46,27 @@ export class ContactService {
       } else if (typeof errorData === 'string') {
         errorMessage = errorData;
       } else {
-        errorMessage = this.errorMessages[errorData?.type] || this.errorMessages['defaultError']; // Usar notación de corchetes
+        const errorType = (errorData?.type as ErrorType) || 'defaultError';
+        errorMessage = this.errorMessages[errorType] || this.errorMessages.defaultError;
       }
     }
 
     console.error('Error:', error);
     return throwError(() => errorMessage);
+  }
+
+  private formatCSVField(value: any): string {
+    if (value === null || value === undefined) return '';
+
+    // Convertir a string y escapar comillas dobles
+    const stringValue = value.toString();
+
+    // Si el valor contiene punto y coma o saltos de línea, encerrarlo en comillas
+    if (stringValue.includes(';') || stringValue.includes('\n') || stringValue.includes('"')) {
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+
+    return stringValue;
   }
 
   private getFieldDisplayName(field: string): string {
@@ -61,6 +78,8 @@ export class ContactService {
       lugar: 'Lugar',
       tipo_contacto: 'Tipo de contacto',
       detalle_tipo: 'Detalle del tipo',
+      tipo_contacto_otro: 'Otro tipo de contacto',
+      detalle_tipo_otro: 'Otro detalle del tipo',
       imagen: 'Imagen'
     };
     return fieldNames[field] || field;
@@ -94,11 +113,11 @@ export class ContactService {
         catchError(error => {
             console.error('Error al eliminar contacto:', error);
             let errorMessage = 'Error al eliminar el contacto';
-            
+
             if (error.error?.message) {
                 errorMessage = error.error.message;
             }
-            
+
             return throwError(() => errorMessage);
         })
     );
@@ -142,18 +161,17 @@ export class ContactService {
 
       // Agregar BOM para que Excel reconozca el UTF-8
       const BOM = '\uFEFF';
-      const blob = new Blob([BOM + csvContent], { 
-        type: 'text/csv;charset=utf-8;' 
+      const blob = new Blob([BOM + csvContent], {
+        type: 'text/csv;charset=utf-8;'
       });
 
       // Crear el enlace de descarga
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
       // Configurar el nombre del archivo con fecha
       const date = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
       const filename = `contactos_${date}.csv`;
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', filename);
       link.style.visibility = 'hidden';
@@ -168,17 +186,15 @@ export class ContactService {
     }
   }
 
-  private formatCSVField(value: any): string {
-    if (value === null || value === undefined) return '';
-    
-    // Convertir a string y escapar comillas dobles
-    const stringValue = value.toString();
-    
-    // Si el valor contiene punto y coma o saltos de línea, encerrarlo en comillas
-    if (stringValue.includes(';') || stringValue.includes('\n') || stringValue.includes('"')) {
-      return `"${stringValue.replace(/"/g, '""')}"`;
-    }
-    
-    return stringValue;
+  addRating(contactId: number, ratings: any[]): Observable<any> {
+    return this.http.post(`${this.API}/${contactId}/ratings`, ratings).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getRatings(contactId: number): Observable<Rating[]> {
+    return this.http.get<Rating[]>(`${this.API}/${contactId}/ratings`).pipe(
+      catchError(this.handleError)
+    );
   }
 }

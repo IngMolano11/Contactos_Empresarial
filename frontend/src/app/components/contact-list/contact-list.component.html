@@ -5,8 +5,8 @@
       <button class="search-toggle-button" (click)="toggleFilters()">
         {{ showFilters ? 'Ocultar filtros' : 'Buscar' }}
       </button>
-      <button class="download-button" 
-              (click)="downloadCSV()" 
+      <button class="download-button"
+              (click)="downloadCSV()"
               [disabled]="filteredContacts.length === 0">
         <i class="fas fa-download"></i>
         Descargar CSV
@@ -27,6 +27,13 @@
     <div *ngFor="let c of filteredContacts" class="contact-card">
       <div class="contact-header">
         <h3>{{ c.nombre }}</h3>
+        <div class="rating-display" *ngIf="c.averageRating">
+          <app-rating
+            [rating]="c.averageRating"
+            [readonly]="true"
+            [size]="'small'">
+          </app-rating>
+        </div>
       </div>
       <div class="contact-body">
         <p class="phone">{{ c.telefono }}</p>
@@ -44,6 +51,10 @@
             <i class="fas fa-edit"></i>
             Editar
           </button>
+          <button (click)="showRatingModal(c)" class="rate-button">
+            <i class="fas fa-star"></i>
+            Calificar
+          </button>
           <button (click)="onDelete(c.id!)" class="delete-button">
             <i class="fas fa-trash"></i>
             Eliminar
@@ -53,10 +64,16 @@
     </div>
   </div>
 
-  <!-- Añadir la notificación de éxito -->
-  <div *ngIf="successMessage" class="success-notification">
-    <i class="fas fa-check-circle"></i>
-    {{ successMessage }}
+  <!-- Notificaciones -->
+  <div class="notification-container">
+    <div *ngIf="successMessage" class="notification success-notification">
+      <i class="fas fa-check-circle"></i>
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="notification error-notification">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ errorMessage }}
+    </div>
   </div>
 </div>
 
@@ -65,3 +82,10 @@
   [contact]="selectedContact"
   [onClose]="closeDetails.bind(this)">
 </app-contact-details>
+<!-- Al final del archivo -->
+<app-rating-modal
+  *ngIf="isRatingModalOpen && selectedContact"
+  [contact]="selectedContact!"
+  (close)="isRatingModalOpen = false"
+  (rated)="onRated($event)">
+</app-rating-modal>

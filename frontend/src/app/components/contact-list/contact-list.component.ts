@@ -1,12 +1,12 @@
-// src/app/components/contact-list/contact-list.component.ts
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
-import { trigger, state, style, transition, animate } from '@angular/animations';
-import { Contacto, FilterCriteria } from '../../models/contacto.model';
-import { ContactService } from '../../services/contact.service';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
 import { ContactFilterComponent } from '../contact-filter/contact-filter.component';
 import { ContactDetailsComponent } from '../contact-details/contact-details.component';
+import { RatingComponent } from '../rating/rating.component';
+import { RatingModalComponent } from '../rating-modal/rating-modal.component';
+import { ContactService } from '../../services/contact.service';
+import { Contacto, FilterCriteria } from '../../models/contacto.model'; // Añadir esta línea
 
 @Component({
   selector: 'app-contact-list',
@@ -15,37 +15,22 @@ import { ContactDetailsComponent } from '../contact-details/contact-details.comp
     CommonModule,
     RouterModule,
     ContactFilterComponent,
-    ContactDetailsComponent
+    ContactDetailsComponent,
+    RatingComponent,
+    RatingModalComponent
   ],
   templateUrl: './contact-list.component.html',
-  styleUrls: ['./contact-list.component.css'],
-  animations: [
-    trigger('filterAnimation', [
-      state('hidden', style({
-        opacity: 0,
-        height: '0px',
-        padding: '0px'
-      })),
-      state('visible', style({
-        opacity: 1,
-        height: '*'
-      })),
-      transition('hidden => visible', [
-        animate('300ms ease-out')
-      ]),
-      transition('visible => hidden', [
-        animate('200ms ease-in')
-      ])
-    ])
-  ]
+  styleUrls: ['./contact-list.component.css']
 })
 export class ContactListComponent implements OnInit {
   contacts: Contacto[] = [];
   filteredContacts: Contacto[] = [];
-  showFilters: boolean = false;
+  showFilters = false;
   selectedContact?: Contacto;
   showDetails = false;
+  errorMessage: string | null = null;
   successMessage: string | null = null;
+  isRatingModalOpen = false;
 
   constructor(
     private service: ContactService,
@@ -78,9 +63,9 @@ export class ContactListComponent implements OnInit {
           this.loadContacts();
           this.showSuccessNotification('Contacto eliminado correctamente');
         },
-        error: (error: any) => {
+        error: (error) => {
           console.error('Error al eliminar el contacto:', error);
-          this.showErrorMessage('No se pudo eliminar el contacto');
+          this.showErrorNotification('Error al eliminar el contacto');
         }
       });
     }
@@ -138,7 +123,7 @@ export class ContactListComponent implements OnInit {
 
   downloadCSV(): void {
     if (this.filteredContacts.length === 0) {
-      this.showErrorMessage('No hay contactos para exportar');
+      this.showErrorNotification('No hay contactos para exportar');
       return;
     }
 
@@ -147,8 +132,36 @@ export class ContactListComponent implements OnInit {
       this.showSuccessNotification('¡Descarga completada!');
     } catch (error) {
       console.error('Error al exportar contactos:', error);
-      this.showErrorMessage('Error al descargar el archivo CSV');
+      this.showErrorNotification('Error al descargar el archivo CSV');
     }
+  }
+
+  showRatingModal(contact: Contacto) {
+    this.selectedContact = contact;
+    this.isRatingModalOpen = true;
+  }
+
+  onRated(ratings: any[]) {
+    if (this.selectedContact) {
+      this.service.addRating(this.selectedContact.id!, ratings).subscribe({
+        next: () => {
+          this.isRatingModalOpen = false;
+          this.loadContacts();
+          this.showSuccessNotification('Calificación guardada correctamente');
+        },
+        error: (error: Error) => {
+          console.error('Error al guardar la calificación:', error);
+          this.showErrorNotification('Error al guardar la calificación');
+        }
+      });
+    }
+  }
+
+  private showErrorNotification(message: string): void {
+    this.errorMessage = message;
+    setTimeout(() => {
+      this.errorMessage = null;
+    }, 3000);
   }
 
   private showSuccessNotification(message: string): void {
@@ -156,9 +169,5 @@ export class ContactListComponent implements OnInit {
     setTimeout(() => {
       this.successMessage = null;
     }, 3000);
-  }
-
-  private showErrorMessage(message: string): void {
-    alert(message);
   }
 }

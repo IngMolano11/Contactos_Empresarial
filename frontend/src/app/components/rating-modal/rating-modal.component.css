@@ -1,0 +1,114 @@
+.rating-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+}
+
+.rating-modal {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--color-purple-basil);
+  font-size: 1.3rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+}
+
+.rating-content {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+.rating-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.rating-item label {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.form-field {
+  margin-top: var(--spacing-lg);
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+}
+
+textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-sm);
+  resize: vertical;
+}
+
+.form-actions {
+  margin-top: var(--spacing-lg);
+  display: flex;
+  justify-content: flex-end;
+}
+
+button[type="submit"] {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-purple-basil);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .rating-modal {
+    width: 95%;
+    padding: var(--spacing-md);
+  }
+
+  .rating-grid {
+    grid-template-columns: 1fr;
+  }
+}

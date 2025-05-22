@@ -22,6 +22,17 @@ export interface Contacto {
   detalle_tipo?: string;
   detalle_tipo_otro?: string;
   imagen?: string;
+  ratings?: Rating[];
+  averageRating?: number;
+}
+
+export interface Rating {
+  id?: number;
+  contactId: number;
+  categoria: string;
+  calificacion: number;
+  comentario: string;
+  fecha: Date;
 }
 
 export interface FilterCriteria {

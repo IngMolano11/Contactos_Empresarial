@@ -99,3 +99,29 @@ def authenticate_user(db: Session, email: str, password: str):
     if not user or not verify_password(password, user.hashed_password):
         return None
     return user
+
+def create_rating(db: Session, rating: schemas.RatingCreate, contact_id: int):
+    db_rating = models_db.Rating(**rating.dict(), contact_id=contact_id)
+    db.add(db_rating)
+    db.commit()
+    db.refresh(db_rating)
+    return db_rating
+
+def update_contact_rating(db: Session, contact_id: int, new_rating: float):
+    contact = db.query(models_db.Contact).filter(models_db.Contact.id == contact_id).first()
+    if contact:
+        if contact.average_rating is not None:
+            # Calcular nuevo promedio considerando calificaciones anteriores
+            ratings_count = db.query(models_db.Rating).filter(
+                models_db.Rating.contact_id == contact_id
+            ).count()
+            contact.average_rating = (
+                (contact.average_rating * ratings_count + new_rating) / 
+                (ratings_count + 1)
+            )
+        else:
+            contact.average_rating = new_rating
+        
+        db.commit()
+        db.refresh(contact)
+    return contact

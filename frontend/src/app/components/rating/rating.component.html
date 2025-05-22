@@ -1,0 +1,13 @@
+<div class="rating" [class.readonly]="readonly" [class.small]="size === 'small'">
+  <div class="stars">
+    <i *ngFor="let star of [1,2,3,4,5]"
+       class="fas"
+       [class.fa-star]="star <= rating"
+       [class.fa-star-o]="star > rating"
+       [style.cursor]="readonly ? 'default' : 'pointer'"
+       (click)="!readonly && rate(star)"
+       (mouseenter)="!readonly && hover(star)"
+       (mouseleave)="!readonly && hover(0)">
+    </i>
+  </div>
+</div>

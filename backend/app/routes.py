@@ -367,3 +367,52 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+# ------------------ CREAR CALIFICACION ------------------
+@router.post(
+    "/{contact_id}/ratings",
+    response_model=List[schemas.RatingInDB],
+    tags=["Calificaciones"]
+)
+async def create_rating(
+    contact_id: int,
+    ratings: List[schemas.RatingCreate],
+    db: Session = Depends(get_db),
+    current_user_email: str = Depends(get_current_user)
+):
+    try:
+        user = crud.get_user_by_email(db, current_user_email)
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            
+        contact = crud.get_contact(db, contact_id, user.id)
+        if not contact:
+            raise HTTPException(status_code=404, detail="Contacto no encontrado")
+
+        db_ratings = []
+        total_rating = 0
+
+        for rating in ratings:
+            db_rating = crud.create_rating(db, rating, contact_id)
+            db_ratings.append(db_rating)
+            total_rating += rating.calificacion
+
+        # Calcular y actualizar el promedio
+        average = total_rating / len(ratings)
+        crud.update_contact_rating(db, contact_id, average)
+
+        return db_ratings
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al crear calificación: {str(e)}"
+        )
+
+@router.get("/contacts/{contact_id}/ratings", response_model=List[schemas.RatingInDB])
+def get_contact_ratings(
+    contact_id: int,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    return crud.get_contact_ratings(db, contact_id)

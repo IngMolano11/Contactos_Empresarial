@@ -1,0 +1,33 @@
+<div class="rating-overlay" (click)="onClose()">
+  <div class="rating-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Calificar: {{contact.nombre}}</h3>
+      <button class="close-button" (click)="onClose()">×</button>
+    </div>
+
+    <form [formGroup]="ratingForm" (ngSubmit)="onSubmit()">
+      <div class="rating-content">
+        <div *ngFor="let categoria of categoriasEvaluacion" class="rating-item">
+          <label>{{categoria}}</label>
+          <app-rating [formControlName]="categoria"></app-rating>
+        </div>
+
+        <div class="form-field">
+          <label>Comentario justificativo: <span class="required">*</span></label>
+          <textarea 
+            formControlName="comentario"
+            maxlength="150"
+            placeholder="Añade un comentario justificativo...">
+          </textarea>
+          <small>{{150 - (ratingForm.get('comentario')?.value?.length || 0)}} caracteres restantes</small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="ratingForm.invalid || loading">
+          {{ loading ? 'Guardando...' : 'Guardar Calificación' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

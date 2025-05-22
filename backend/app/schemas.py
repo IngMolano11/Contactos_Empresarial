@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, validator, ConfigDict
 from typing import Optional, List
 from .models import TipoContactoEnum, DetalleTipoEnum, TIPO_DETALLE_MAPPING
+from datetime import datetime
 
 # Clase base para Contacto
 class ContactBase(BaseModel):
@@ -92,3 +93,27 @@ class Token(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class RatingBase(BaseModel):
+    categoria: str
+    calificacion: int = Field(..., ge=1, le=5)
+    comentario: str = Field(..., max_length=150)
+
+class RatingCreate(RatingBase):
+    pass
+
+class RatingInDB(RatingBase):
+    id: int
+    contact_id: int
+    fecha: datetime
+
+    class Config:
+        from_attributes = True
+
+# Actualizar ContactResponse para incluir ratings
+class ContactResponse(ContactBase):
+    id: int
+    average_rating: Optional[float] = None
+    
+    class Config:
+        from_attributes = True
