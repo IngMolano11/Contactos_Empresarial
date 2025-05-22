@@ -6,7 +6,7 @@ import { ContactDetailsComponent } from '../contact-details/contact-details.comp
 import { RatingComponent } from '../rating/rating.component';
 import { RatingModalComponent } from '../rating-modal/rating-modal.component';
 import { ContactService } from '../../services/contact.service';
-import { Contacto, FilterCriteria } from '../../models/contacto.model'; // Añadir esta línea
+import { Contacto, FilterCriteria } from '../../models/contacto.model'; // Añadir FilterCriteria
 
 @Component({
   selector: 'app-contact-list',

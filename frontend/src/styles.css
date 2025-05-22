@@ -24,6 +24,8 @@ body {
   --color-primary: var(--color-purple-basil);
   --color-primary-hover: var(--color-purple-basil-light);
   --color-focus-ring: rgba(78, 45, 62, 0.1);
+  --color-purple-basil: #5E3D4E;
+  --color-purple-basil-light: #8A5D7C;
 }
 
 /* Tipografía */

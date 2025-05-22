@@ -11,12 +11,12 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       <div class="stars">
         <i *ngFor="let star of [1,2,3,4,5]"
            class="fas"
-           [class.fa-star]="star <= rating"
-           [class.fa-star-o]="star > rating"
+           [class.fa-star]="star <= value"
+           [class.fa-star-o]="star > value"
            [style.cursor]="readonly ? 'default' : 'pointer'"
-           (click)="!readonly && rate(star)"
-           (mouseenter)="!readonly && hover(star)"
-           (mouseleave)="!readonly && hover(0)">
+           (click)="!readonly && onRate(star)"
+           (mouseenter)="!readonly && onHover(star)"
+           (mouseleave)="!readonly && onHover(value)">
         </i>
       </div>
     </div>
@@ -32,6 +32,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     }
     .stars i {
       transition: all var(--transition-normal);
+      font-size: 1.2rem;
     }
     .rating:not(.readonly) .stars i:hover {
       transform: scale(1.2);
@@ -52,16 +53,23 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   ]
 })
 export class RatingComponent implements ControlValueAccessor {
-  @Input() rating = 0;
   @Input() readonly = false;
   @Input() size: 'normal' | 'small' = 'normal';
+  @Input() set rating(val: number) {
+    this.value = val;
+    this.onChange(this.value);
+  }
+  get rating(): number {
+    return this.value;
+  }
 
+  value = 0;
   disabled = false;
   onChange = (value: number) => {};
   onTouched = () => {};
 
   writeValue(value: number): void {
-    this.rating = value;
+    this.value = value || 0;
   }
 
   registerOnChange(fn: any): void {
@@ -76,17 +84,17 @@ export class RatingComponent implements ControlValueAccessor {
     this.disabled = isDisabled;
   }
 
-  rate(value: number): void {
+  onRate(value: number): void {
     if (!this.disabled && !this.readonly) {
-      this.rating = value;
-      this.onChange(this.rating);
+      this.value = value;
+      this.onChange(this.value);
       this.onTouched();
     }
   }
 
-  hover(value: number): void {
+  onHover(value: number): void {
     if (!this.disabled && !this.readonly) {
-      this.rating = value;
+      this.value = value;
     }
   }
 }

@@ -54,11 +54,31 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-sm);
 }
 
-.rating-item label {
+.rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rating-header label {
   font-weight: 500;
   color: var(--color-text);
+}
+
+.rating-value {
+  font-size: 0.9rem;
+  color: var(--color-purple-basil);
+  font-weight: 500;
+}
+
+.rating-error {
+  color: var(--color-error);
+  font-size: 0.85rem;
 }
 
 .form-field {
@@ -80,20 +100,44 @@ textarea {
   resize: vertical;
 }
 
+.form-field-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-xs);
+}
+
+.error-message {
+  color: var(--color-error);
+  font-size: 0.85rem;
+}
+
 .form-actions {
   margin-top: var(--spacing-lg);
   display: flex;
   justify-content: flex-end;
+  gap: var(--spacing-md);
 }
 
-button[type="submit"] {
+.cancel-button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+}
+
+.submit-button {
   padding: var(--spacing-sm) var(--spacing-lg);
   background-color: var(--color-purple-basil);
   color: var(--color-text-light);
   border: none;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 button[type="submit"]:disabled {
@@ -101,14 +145,14 @@ button[type="submit"]:disabled {
   cursor: not-allowed;
 }
 
+.required {
+  color: var(--color-error);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .rating-modal {
     width: 95%;
     padding: var(--spacing-md);
-  }
-
-  .rating-grid {
-    grid-template-columns: 1fr;
   }
 }

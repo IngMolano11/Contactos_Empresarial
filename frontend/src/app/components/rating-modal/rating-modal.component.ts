@@ -37,6 +37,28 @@ export class RatingModalComponent implements OnInit {
     });
   }
 
+  onSubmit() {
+    if (this.ratingForm.valid) {
+      this.loading = true;
+      const ratings = this.categoriasEvaluacion.map(categoria => ({
+        categoria,
+        calificacion: this.ratingForm.get(categoria)?.value,
+        comentario: this.ratingForm.get('comentario')?.value
+      }));
+      this.rated.emit(ratings);
+    } else {
+      // Marcar todos los campos como tocados para mostrar errores
+      Object.keys(this.ratingForm.controls).forEach(key => {
+        const control = this.ratingForm.get(key);
+        control?.markAsTouched();
+      });
+    }
+  }
+
+  onClose() {
+    this.close.emit();
+  }
+
   private getCategoriasByTipoContacto(tipo: string): string[] {
     const categoriasMap: { [key: string]: string[] } = {
       'Proveedor': [
@@ -96,21 +118,5 @@ export class RatingModalComponent implements OnInit {
       ]
     };
     return categoriasMap[tipo] || ['Relación general'];
-  }
-
-  onSubmit() {
-    if (this.ratingForm.valid) {
-      this.loading = true;
-      const ratings = this.categoriasEvaluacion.map(categoria => ({
-        categoria,
-        calificacion: this.ratingForm.get(categoria)?.value,
-        comentario: this.ratingForm.get('comentario')?.value
-      }));
-      this.rated.emit(ratings);
-    }
-  }
-
-  onClose() {
-    this.close.emit();
   }
 }
