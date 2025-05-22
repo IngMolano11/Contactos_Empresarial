@@ -137,33 +137,37 @@ export class ContactService {
     }
 
     try {
-      // Definir las columnas y headers
+      // Headers actualizados con todos los campos
       const headers = [
+        'ID',
         'Nombre',
         'Teléfono',
         'Email',
         'Dirección',
         'Lugar',
         'Tipo de Contacto',
-        'Detalle del Tipo',
         'Tipo de Contacto (Otro)',
-        'Detalle del Tipo (Otro)'
+        'Detalle del Tipo',
+        'Detalle del Tipo (Otro)',
+        'Calificación Promedio'
       ];
 
-      // Convertir los datos a formato CSV
-      const csvData = contacts.map(contact => ([
+      // Datos actualizados incluyendo todos los campos
+      const csvData = contacts.map(contact => [
+        this.formatCSVField(contact.id),
         this.formatCSVField(contact.nombre),
         this.formatCSVField(contact.telefono),
         this.formatCSVField(contact.email),
         this.formatCSVField(contact.direccion),
         this.formatCSVField(contact.lugar),
         this.formatCSVField(contact.tipo_contacto),
-        this.formatCSVField(contact.detalle_tipo),
         this.formatCSVField(contact.tipo_contacto_otro),
-        this.formatCSVField(contact.detalle_tipo_otro)
-      ]));
+        this.formatCSVField(contact.detalle_tipo),
+        this.formatCSVField(contact.detalle_tipo_otro),
+        this.formatCSVField(contact.averageRating ? contact.averageRating.toFixed(1) : '')
+      ]);
 
-      // Crear el contenido del CSV con separador de punto y coma
+      // Crear el contenido del CSV
       let csvContent = headers.join(';') + '\n';
       csvContent += csvData.map(row => row.join(';')).join('\n');
 
@@ -176,6 +180,7 @@ export class ContactService {
       // Crear el enlace de descarga
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
+      
       // Configurar el nombre del archivo con fecha
       const date = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
       const filename = `contactos_${date}.csv`;
