@@ -126,3 +126,11 @@ def update_contact_rating(db: Session, contact_id: int, new_rating: float):
             
         db.commit()
         return contact
+
+def get_contact_ratings(db: Session, contact_id: int):
+    """
+    Obtiene todas las calificaciones de un contacto específico.
+    """
+    return db.query(models_db.Rating).filter(
+        models_db.Rating.contact_id == contact_id
+    ).order_by(models_db.Rating.fecha.desc()).all()

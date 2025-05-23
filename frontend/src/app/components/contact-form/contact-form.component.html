@@ -87,7 +87,7 @@
       <label>Foto del contacto:</label>
       <label class="image-upload-button">
         <i class="fas fa-camera"></i>
-        {{ imagePreview ? 'Cambiar foto' : 'Subir foto' }}
+        {{ hasExistingImage ? 'Cambiar foto' : 'Subir foto' }}
         <input
           type="file"
           (change)="onFileSelected($event)"
@@ -95,7 +95,9 @@
         >
       </label>
       <div class="image-preview" *ngIf="imagePreview">
-        <img [src]="imagePreview" alt="Vista previa">
+        <img [src]="imagePreview" 
+             [alt]="hasExistingImage ? 'Foto actual del contacto' : 'Vista previa'"
+             (error)="imagePreview = 'assets/images/default-avatar.png'">
       </div>
       <div *ngIf="imageError" class="error">
         {{ imageError }}

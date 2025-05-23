@@ -88,7 +88,7 @@
 }
 
 .details-section {
-  margin-bottom: var(--spacing-lg);
+  margin-top: var(--spacing-md);
 }
 
 .detail-item {
@@ -142,6 +142,34 @@
   background: var(--color-purple-basil);
   color: var(--color-text-light);
   transform: rotate(90deg);
+}
+
+.reviews-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-purple-basil);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+}
+
+.reviews-button:hover {
+  background: var(--color-purple-basil-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.rating-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.85rem;
 }
 
 @media (max-width: 768px) {

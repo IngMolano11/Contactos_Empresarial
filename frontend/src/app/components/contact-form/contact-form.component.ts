@@ -11,6 +11,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ContactService } from '../../services/contact.service';
 import { Contacto, TipoContacto, DetalleTipo } from '../../models/contacto.model';
 import { Nl2brPipe } from '../../pipes/nl2br.pipe';
+import { environment } from '../../../environments/environment'; // Corregir esta línea
+
 
 @Component({
   selector: 'app-contact-form',
@@ -31,11 +33,12 @@ export class ContactFormComponent implements OnInit {
   isEditing = false;
   contactId?: number;
   imagePreview: string | null = null;
+  hasExistingImage: boolean = false;
   imageError: string | null = null;
   selectedFile: File | null = null;
 
   tipoContactoOptions = [
-    'Proveedor', 'Cliente', 'Empleado', 'Externo', 
+    'Proveedor', 'Cliente', 'Empleado', 'Externo',
     'Socio', 'Aliado', 'Otro'
   ];
 
@@ -74,7 +77,7 @@ export class ContactFormComponent implements OnInit {
     this.form.get('tipo_contacto')?.valueChanges.subscribe(value => {
       const detalleTipoControl = this.form.get('detalle_tipo');
       detalleTipoControl?.setValue('');
-      
+
       if (value === 'Otro') {
         this.form.get('tipo_contacto_otro')?.setValidators([Validators.required]);
       } else {
@@ -110,6 +113,11 @@ export class ContactFormComponent implements OnInit {
     this.service.getContact(id).subscribe({
       next: (contacto: Contacto) => {
         this.form.patchValue(contacto);
+        if (contacto.imagen) {
+          this.hasExistingImage = true;
+          // Construir la URL completa de la imagen
+          this.imagePreview = `${environment.apiUrl.replace('/api/contactos', '')}${contacto.imagen}`;
+        }
         this.loading = false;
       },
       error: (error: any) => {
@@ -129,12 +137,6 @@ export class ContactFormComponent implements OnInit {
         return;
       }
 
-      // Validar tamaño (opcional, comentar si no quieres límite)
-      // if (file.size > 5 * 1024 * 1024) {
-      //   this.imageError = 'La imagen no debe superar los 5MB';
-      //   return;
-      // }
-
       this.selectedFile = file;
       this.imageError = null;
 
@@ -142,6 +144,7 @@ export class ContactFormComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview = reader.result as string;
+        this.hasExistingImage = true;
       };
       reader.onerror = () => {
         this.imageError = 'Error al leer el archivo';
@@ -161,7 +164,7 @@ export class ContactFormComponent implements OnInit {
       this.successMessage = null;
 
       const formData = new FormData();
-      
+
       // Agregar todos los campos del formulario
       Object.keys(this.form.controls).forEach(key => {
         const value = this.form.get(key)?.value;
@@ -175,7 +178,7 @@ export class ContactFormComponent implements OnInit {
         formData.append('imagen', this.selectedFile);
       }
 
-      const request$ = this.isEditing 
+      const request$ = this.isEditing
         ? this.service.update(this.contactId!, formData)
         : this.service.create(formData);
 

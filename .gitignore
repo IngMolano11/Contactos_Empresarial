@@ -15,3 +15,22 @@ node_modules/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Angular (Added: 2025-05-22)
+dist/
+tmp/
+app/**/*.js
+app/**/*.js.map
+bower_components/
+.idea/
+.sass-cache/
+connect.lock/
+coverage/
+libpeerconnection.log/
+npm-debug.log
+testem.log
+typings/
+.angular/
+e2e/*.js
+e2e/*.map
+.DS_Store/

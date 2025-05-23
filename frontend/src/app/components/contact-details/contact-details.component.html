@@ -8,7 +8,7 @@
     <div class="details-content" *ngIf="contact">
       <!-- Imagen del contacto -->
       <div class="contact-image" *ngIf="contact?.imagen">
-        <img [src]="getImageUrl(contact.imagen)" 
+        <img [src]="getImageUrl(contact.imagen)"
              alt="Foto de contacto"
              (error)="onImageError($event)">
       </div>
@@ -56,6 +56,23 @@
           <p>{{contact.detalle_tipo === 'Otro' ? contact.detalle_tipo_otro : contact.detalle_tipo}}</p>
         </div>
       </div>
+
+      <!-- Botón para ver reseñas -->
+      <div class="details-section">
+        <button class="reviews-button" (click)="onShowReviews()">
+          <i class="fas fa-star"></i>
+          Ver Reseñas
+          <span class="rating-badge">{{contact.averageRating?.toFixed(1) || '0'}}</span>
+        </button>
+      </div>
+
+      <!-- Modal de reseñas -->
+      <app-reviews-modal
+        *ngIf="showReviews"
+        [contact]="contact"
+        [reviews]="reviews"
+        (close)="onCloseReviews()">
+      </app-reviews-modal>
     </div>
   </div>
 </div>

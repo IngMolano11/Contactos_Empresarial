@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { Contacto, Rating } from '../models/contacto.model';
+import { Observable, throwError, from } from 'rxjs';
+import { catchError, map, concatMap } from 'rxjs/operators';
+import { Contacto, Rating, Review } from '../models/contacto.model';
 import { environment } from '../../environments/environment';
 
 type ErrorType = 'defaultError' | 'validation' | 'notFound' | 'unauthorized' | 'serverError';
@@ -12,7 +12,7 @@ type ErrorType = 'defaultError' | 'validation' | 'notFound' | 'unauthorized' | '
 })
 export class ContactService {
   private API = environment.apiUrl;
-  
+
   // Definir los mensajes de error como propiedad de la clase
   private errorMessages = {
     defaultError: 'Ha ocurrido un error inesperado',
@@ -180,7 +180,7 @@ export class ContactService {
       // Crear el enlace de descarga
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       // Configurar el nombre del archivo con fecha
       const date = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
       const filename = `contactos_${date}.csv`;
@@ -205,9 +205,96 @@ export class ContactService {
     );
   }
 
-  getRatings(contactId: number): Observable<Rating[]> {
-    return this.http.get<Rating[]>(`${this.API}/${contactId}/ratings`).pipe(
-      catchError(this.handleError)
-    );
+  getRatings(contactId: number): Observable<Review[]> {
+    return this.http.get<Review[]>(`${this.API}/${contactId}/ratings`);
+  }
+
+  importFromCSV(file: File): Observable<any> {
+    return new Observable((observer) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const text = e.target?.result as string;
+          const contacts = this.parseCSV(text);
+
+          // Crear un observable para procesar cada contacto
+          const importObservable = from(contacts).pipe(
+            concatMap(contact => {
+              const formData = new FormData();
+              Object.keys(contact).forEach(key => {
+                if (contact[key] !== undefined && contact[key] !== null) {
+                  formData.append(key, contact[key]);
+                }
+              });
+              return this.create(formData);
+            })
+          );
+
+          // Suscribirse al observable de importación
+          importObservable.subscribe({
+            next: (response) => {
+              observer.next(response);
+            },
+            error: (error) => {
+              observer.error(error);
+            },
+            complete: () => {
+              observer.complete();
+            }
+          });
+        } catch (error) {
+          observer.error('Error al procesar el archivo CSV');
+        }
+      };
+
+      reader.onerror = () => {
+        observer.error('Error al leer el archivo');
+      };
+
+      reader.readAsText(file);
+    });
+  }
+
+  private parseCSV(csvText: string): any[] {
+    const lines = csvText.split('\n');
+    const headers = lines[0].split(';').map(h => h.trim());
+    const result = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+
+      const values = lines[i].split(';').map(v => v.trim());
+      const obj: any = {};
+
+      headers.forEach((header, index) => {
+        let key = this.mapHeaderToField(header);
+        if (key && values[index]) {
+          obj[key] = values[index].replace(/^"(.*)"$/, '$1'); // Remover comillas
+        }
+      });
+
+      if (Object.keys(obj).length > 0) {
+        result.push(obj);
+      }
+    }
+
+    return result;
+  }
+
+  private mapHeaderToField(header: string): string | null {
+    const mapping: { [key: string]: string } = {
+      'ID': 'id',
+      'Nombre': 'nombre',
+      'Teléfono': 'telefono',
+      'Email': 'email',
+      'Dirección': 'direccion',
+      'Lugar': 'lugar',
+      'Tipo de Contacto': 'tipo_contacto',
+      'Tipo de Contacto (Otro)': 'tipo_contacto_otro',
+      'Detalle del Tipo': 'detalle_tipo',
+      'Detalle del Tipo (Otro)': 'detalle_tipo_otro'
+    };
+    return mapping[header] || null;
   }
 }

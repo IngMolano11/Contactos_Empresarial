@@ -158,6 +158,32 @@ export class ContactListComponent implements OnInit {
     }
   }
 
+  async onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'text/csv') {
+      this.showErrorNotification('Por favor, selecciona un archivo CSV válido');
+      return;
+    }
+
+    try {
+      this.service.importFromCSV(file).subscribe({
+        next: () => {
+          this.loadContacts();
+          this.showSuccessNotification('Contactos importados correctamente');
+        },
+        error: (error) => {
+          console.error('Error al importar contactos:', error);
+          this.showErrorNotification('Error al importar los contactos');
+        }
+      });
+    } catch (error) {
+      console.error('Error al procesar el archivo:', error);
+      this.showErrorNotification('Error al procesar el archivo CSV');
+    }
+  }
+
   private showErrorNotification(message: string): void {
     this.errorMessage = message;
     setTimeout(() => {

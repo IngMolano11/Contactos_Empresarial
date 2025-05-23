@@ -409,10 +409,39 @@ async def create_rating(
             detail=f"Error al crear calificación: {str(e)}"
         )
 
-@router.get("/contacts/{contact_id}/ratings", response_model=List[schemas.RatingInDB])
+@router.get(
+    "/{contact_id}/ratings",
+    response_model=List[schemas.RatingInDB],
+    tags=["Calificaciones"]
+)
 def get_contact_ratings(
     contact_id: int,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user_email: str = Depends(get_current_user)
 ):
-    return crud.get_contact_ratings(db, contact_id)
+    try:
+        # Obtener el usuario actual
+        user = crud.get_user_by_email(db, current_user_email)
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        # Verificar que el contacto existe y pertenece al usuario
+        contact = crud.get_contact(db, contact_id, user.id)
+        if not contact:
+            raise HTTPException(status_code=404, detail="Contacto no encontrado")
+
+        # Obtener las calificaciones
+        ratings = db.query(models_db.Rating).filter(
+            models_db.Rating.contact_id == contact_id
+        ).order_by(models_db.Rating.fecha.desc()).all()
+
+        return ratings
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": f"Error al obtener las calificaciones: {str(e)}",
+                "type": "server_error"
+            }
+        )

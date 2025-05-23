@@ -261,7 +261,7 @@ form.loading button {
 .image-upload-button:hover {
   background-color: var(--color-surface-variant);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .image-upload-button i {
@@ -276,6 +276,7 @@ form.loading button {
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md);
   border: 1px solid var(--color-input-border);
+  transition: all var(--transition-normal);
 }
 
 .image-preview img {
@@ -287,7 +288,7 @@ form.loading button {
   transition: transform var(--transition-normal);
 }
 
-.image-preview img:hover {
+.image-preview:hover img {
   transform: scale(1.05);
 }
 
