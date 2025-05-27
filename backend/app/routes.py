@@ -8,6 +8,8 @@ from pathlib import Path
 from . import crud, models_db, models, schemas
 from .deps import get_db, get_current_user
 from .models import TipoContactoEnum, DetalleTipoEnum
+from .email_utils import EmailSender
+import json
 
 router = APIRouter()
 
@@ -15,6 +17,8 @@ router = APIRouter()
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True, parents=True)
 ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
+TEMP_UPLOAD_DIR = UPLOAD_DIR / "temp"
+TEMP_UPLOAD_DIR.mkdir(exist_ok=True, parents=True)
 
 def validate_image(file: UploadFile) -> bool:
     """Valida que el archivo sea una imagen"""
@@ -444,4 +448,56 @@ def get_contact_ratings(
                 "message": f"Error al obtener las calificaciones: {str(e)}",
                 "type": "server_error"
             }
+        )
+
+# ------------------ ENVIAR EMAIL ------------------
+@router.post("/send-email", tags=["Email"])
+async def send_email(
+    subject: str = Form(...),
+    message: str = Form(...),
+    recipients: str = Form(...),
+    attachments: List[UploadFile] = File(None),
+    current_user_email: str = Depends(get_current_user)
+):
+    try:
+        recipients_list = json.loads(recipients)
+        temp_files = []
+
+        if attachments:
+            for file in attachments:
+                temp_path = TEMP_UPLOAD_DIR / file.filename
+                with open(temp_path, "wb") as buffer:
+                    buffer.write(await file.read())
+                temp_files.append(str(temp_path))
+
+        try:
+            email_sender = EmailSender()
+            await email_sender.send_email(
+                recipients=recipients_list,
+                subject=subject,
+                message=message,
+                attachments=temp_files if temp_files else None
+            )
+
+            # Limpiar archivos temporales
+            for file_path in temp_files:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            return {"message": "Email enviado correctamente"}
+
+        except Exception as e:
+            # Limpiar archivos temporales en caso de error
+            for file_path in temp_files:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error al enviar el email: {str(e)}"
+            )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error en el procesamiento: {str(e)}"
         )

@@ -297,7 +297,66 @@ textarea {
   }
 }
 
-/* Media queries para responsividad */
+/* Contenedor de notificaciones */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Estilos base para notificaciones */
+.notification {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  box-shadow: var(--shadow-md);
+  animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+/* Notificación de éxito */
+.success-notification {
+  background-color: var(--color-success);
+  color: var(--color-text-light);
+  border-left: 4px solid var(--color-success-dark);
+}
+
+/* Notificación de error */
+.error-notification {
+  background-color: var(--color-error);
+  color: var(--color-text-light);
+  border-left: 4px solid var(--color-error-dark);
+}
+
+/* Animaciones */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .email-container {
     height: calc(100vh - 80px);
@@ -321,5 +380,17 @@ textarea {
     width: 95%;
     height: 90vh;
     margin: 0;
+  }
+
+  .notification-container {
+    top: auto;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+  }
+
+  .notification {
+    min-width: auto;
+    width: 100%;
   }
 }

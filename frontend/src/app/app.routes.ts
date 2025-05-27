@@ -4,6 +4,7 @@ import { ContactFormComponent } from './components/contact-form/contact-form.com
 import { LoginComponent } from './components/login/login.component';
 import { authGuard } from './guards/auth.guard';
 import { EmailComponent } from './components/email/email.component';  // Asegurarnos que existe este componente
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 export const appRoutes: Routes = [
   {
@@ -34,5 +35,10 @@ export const appRoutes: Routes = [
     path: 'email',
     component: EmailComponent,
     canActivate: [authGuard]
-  }
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [authGuard]
+  },
 ];

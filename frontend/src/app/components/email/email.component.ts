@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ContactService } from '../../services/contact.service';
+import { EmailService } from '../../services/email.service';
 import { Contacto } from '../../models/contacto.model';
 import { ContactSelectorComponent } from '../contact-selector/contact-selector.component';
 
@@ -27,7 +28,8 @@ export class EmailComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private contactService: ContactService
+    private contactService: ContactService,
+    private emailService: EmailService  // Añadir el servicio
   ) {
     this.emailForm = this.fb.group({
       subject: ['', Validators.required],
@@ -69,29 +71,45 @@ export class EmailComponent implements OnInit {
     if (this.emailForm.valid && this.selectedRecipients.length > 0) {
       this.loading = true;
       this.errorMessage = null;
+      this.successMessage = null;
 
       const formData = new FormData();
       formData.append('subject', this.emailForm.get('subject')?.value);
       formData.append('message', this.emailForm.get('message')?.value);
       formData.append('recipients', JSON.stringify(this.selectedRecipients));
 
-      this.selectedFiles.forEach((file, index) => {
-        formData.append(`attachments`, file);
+      this.selectedFiles.forEach(file => {
+        formData.append('attachments', file);
       });
 
-      // TODO: Implementar el servicio de email
-      console.log('Enviando email:', formData);
-
-      // Simulación de envío exitoso
-      setTimeout(() => {
-        this.loading = false;
-        this.successMessage = 'Email enviado correctamente';
-        this.emailForm.reset();
-        this.selectedRecipients = [];
-        this.selectedFiles = [];
-      }, 2000);
+      this.emailService.sendEmail(formData).subscribe({
+        next: (response) => {
+          this.loading = false;
+          this.successMessage = 'Correo enviado exitosamente';
+          this.emailForm.reset();
+          this.selectedRecipients = [];
+          this.selectedFiles = [];
+          
+          // Limpiar la notificación después de 3 segundos
+          setTimeout(() => {
+            this.successMessage = null;
+          }, 3000);
+        },
+        error: (error) => {
+          this.loading = false;
+          this.errorMessage = error.error.detail || 'Error al enviar el email';
+          
+          // Limpiar el mensaje de error después de 3 segundos
+          setTimeout(() => {
+            this.errorMessage = null;
+          }, 3000);
+        }
+      });
     } else {
       this.errorMessage = 'Por favor complete todos los campos requeridos y añada al menos un destinatario';
+      setTimeout(() => {
+        this.errorMessage = null;
+      }, 3000);
     }
   }
 }

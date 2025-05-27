@@ -4,36 +4,45 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.database import Base, get_db
 from app.main import app
+import os
 
-# 1) Motor de prueba en SQLite en memoria
-TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(TEST_SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+# Usar base de datos en memoria para tests
+TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(
+    TEST_SQLALCHEMY_DATABASE_URL, 
+    connect_args={"check_same_thread": False}
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 2) Crear tablas antes de cada sesión de tests
-@pytest.fixture(scope="session", autouse=True)
-def create_test_db():
+@pytest.fixture(scope="function")
+def db():
+    """
+    Crea una base de datos limpia para cada test
+    """
+    # Crear tablas
     Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-
-# 3) Fixture de sesión de DB
-@pytest.fixture()
-def db_session():
-    session = TestingSessionLocal()
+    
+    # Crear sesión
+    db = TestingSessionLocal()
     try:
-        yield session
+        yield db
     finally:
-        session.close()
+        db.close()
+        # Limpiar todas las tablas después de cada test
+        Base.metadata.drop_all(bind=engine)
 
-# 4) Override de la dependencia get_db en FastAPI
-@pytest.fixture()
-def client(db_session):
+@pytest.fixture(scope="function")
+def client(db):
+    """
+    Cliente de prueba con base de datos limpia
+    """
     def override_get_db():
         try:
-            yield db_session
+            yield db
         finally:
-            pass
+            db.rollback()
+    
     app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
-    app.dependency_overrides.clear()
+    with TestClient(app) as test_client:
+        yield test_client
+    del app.dependency_overrides[get_db]
